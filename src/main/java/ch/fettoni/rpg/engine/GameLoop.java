@@ -7,13 +7,13 @@ import ch.fettoni.rpg.world.World;
 public class GameLoop implements Runnable {
 
     private static final int FPS = 60;
+
     private boolean running = false;
     private Thread thread;
 
     private final GamePanel panel;
     private final Player player;
     private final World world;
-
 
     public GameLoop(GamePanel panel, Player player, World world) {
         this.panel = panel;
@@ -31,20 +31,26 @@ public class GameLoop implements Runnable {
 
     @Override
     public void run() {
-        long frameTime = 1000 / FPS;
+
+        final double targetTime = 1_000_000_000.0 / FPS;
+
+        long lastTime = System.nanoTime();
 
         while (running) {
-            long startTime = System.currentTimeMillis();
 
-            update();
-            panel.repaint(); // 🔑 DAS ist der Schlüssel
+            long now = System.nanoTime();
+            double deltaTime = (now - lastTime) / 1_000_000_000.0;
+            lastTime = now;
 
-            long elapsed = System.currentTimeMillis() - startTime;
-            long sleepTime = frameTime - elapsed;
+            update(deltaTime);
+            panel.repaint();
+
+            long frameTime = System.nanoTime() - now;
+            long sleepTime = (long) (targetTime - frameTime);
 
             if (sleepTime > 0) {
                 try {
-                    Thread.sleep(sleepTime);
+                    Thread.sleep(sleepTime / 1_000_000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -52,7 +58,7 @@ public class GameLoop implements Runnable {
         }
     }
 
-    private void update() {
-        world.update(player);
+    private void update(double deltaTime) {
+        world.update(player, deltaTime);
     }
 }

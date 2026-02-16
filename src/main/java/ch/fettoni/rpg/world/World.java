@@ -10,8 +10,9 @@ public class World {
         this.height = height;
     }
 
-    public void update(Player player) {
-        player.moveRight();
+    public void update(Player player, double deltaTime) {
+        player.update(deltaTime);
         player.clampX(0, width - player.getSize());
+        player.clampY(0, height - player.getSize());
     }
-}
+}//end of class

@@ -2,38 +2,57 @@ package ch.fettoni.rpg.world;
 
 public class Player {
 
-    private int x;
-    private int y;
+    private double x;
+    private double y;
+
+    private int dx = 0;
+    private int dy = 0;
 
     private static final int SIZE = 10;
-    private static final int SPEED = 2;
+    private static final double SPEED = 200.0; // Pixel pro Sekunde
 
-    private static final int WORLD_WIDTH = 800;
-    private static final int WORLD_HEIGHT = 600;
-
-    public Player(int x, int y) {
+    public Player(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public void moveRight() {
-        x += SPEED;
+    public void setDx(int dx) {
+        this.dx = dx;
     }
 
-    public int getX() {
+    public void setDy(int dy) {
+        this.dy = dy;
+    }
+
+    public void update(double deltaTime) {
+        double moveX = dx;
+        double moveY = dy;
+
+        if (dx != 0 && dy != 0) {
+            double factor = 1 / Math.sqrt(2);
+            moveX *= factor;
+            moveY *= factor;
+        }
+
+        x += moveX * SPEED * deltaTime;
+        y += moveY * SPEED * deltaTime;
+    }
+
+    public void clampX(double min, double max) {
+        if (x < min) x = min;
+        if (x > max) x = max;
+    }
+
+    public void clampY(double min, double max) {
+        if (y < min) y = min;
+        if (y > max) y = max;
+    }
+
+    public double getX() {
         return x;
     }
 
-    public void clampX(int min, int max) {
-        if (x < min) {
-            x = min;
-        }
-        if (x > max) {
-            x = max;
-        }
-    }
-
-    public int getY() {
+    public double getY() {
         return y;
     }
 
