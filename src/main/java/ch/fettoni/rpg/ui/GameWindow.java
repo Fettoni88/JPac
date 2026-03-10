@@ -19,9 +19,13 @@ public class GameWindow {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
-        Player player = new Player(50, 50);
-        World world = new World(800, 600);
-        TileMap map = new TileMap();
+        Player player = new Player(200, 200);
+        TileMap map = new TileMap("/maps/map.txt");
+
+        int worldWidth = map.getCols() * map.getTileSize();
+        int worldHeight = map.getRows() * map.getTileSize();
+
+        World world = new World(worldWidth, worldHeight, map);
 
         panel = new GamePanel(player, map);
 

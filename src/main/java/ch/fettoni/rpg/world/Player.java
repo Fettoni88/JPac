@@ -48,6 +48,27 @@ public class Player {
         if (y > max) y = max;
     }
 
+    public void moveX(double deltaTime) {
+        x += dx * SPEED * deltaTime;
+    }
+
+    public void moveY(double deltaTime) {
+        y += dy * SPEED * deltaTime;
+    }
+
+    public void setX(double x) {
+        this.x = (int) x;
+    }
+
+    public void setY(double y) {
+        this.y = (int) y;
+    }
+
+    public void setPosition(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
     public double getX() {
         return x;
     }
