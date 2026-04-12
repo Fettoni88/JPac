@@ -14,28 +14,37 @@ public class TileRenderer {
         this.map = map;
     }
 
-    public void render(Graphics g) {
+    public void render(Graphics g, int cameraX, int cameraY, int screenWidth, int screenHeight) {
 
         int tileSize = map.getTileSize();
 
-        for (int row = 0; row < map.getRows(); row++) {
-            for (int col = 0; col < map.getCols(); col++) {
+        int firstCol = cameraX / tileSize;
+        int lastCol = (cameraX + screenWidth) / tileSize;
+
+        int firstRow = cameraY / tileSize;
+        int lastRow = (cameraY + screenHeight) / tileSize;
+
+        for (int row = firstRow; row <= lastRow; row++) {
+            for (int col = firstCol; col <= lastCol; col++) {
+
+                if (row < 0 || col < 0 || row >= map.getRows() || col >= map.getCols()) {
+                    continue;
+                }
 
                 TileType tile = map.getTile(row, col);
 
+                int worldX = col * tileSize;
+                int worldY = row * tileSize;
+
+                int screenX = worldX - cameraX;
+                int screenY = worldY - cameraY;
+
                 switch (tile) {
-
                     case WALL -> g.setColor(Color.DARK_GRAY);
-
                     case FLOOR -> g.setColor(Color.GRAY);
                 }
 
-                g.fillRect(
-                        col * tileSize,
-                        row * tileSize,
-                        tileSize,
-                        tileSize
-                );
+                g.fillRect(screenX, screenY, tileSize, tileSize);
             }
         }
     }

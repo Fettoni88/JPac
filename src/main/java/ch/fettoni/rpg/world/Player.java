@@ -1,19 +1,11 @@
 package ch.fettoni.rpg.world;
 
-public class Player {
-
-    private double x;
-    private double y;
-
-    private int dx = 0;
-    private int dy = 0;
+public class Player extends MovingEntity {
 
     private static final int SIZE = 10;
-    private static final double SPEED = 200.0; // Pixel pro Sekunde
 
     public Player(double x, double y) {
-        this.x = x;
-        this.y = y;
+        super(x, y, SIZE, 200.0);
     }
 
     public void setDx(int dx) {
@@ -24,18 +16,12 @@ public class Player {
         this.dy = dy;
     }
 
-    public void update(double deltaTime) {
-        double moveX = dx;
-        double moveY = dy;
+    @Override
+    public void update(World world, double deltaTime) {
+        move(world, deltaTime);
 
-        if (dx != 0 && dy != 0) {
-            double factor = 1 / Math.sqrt(2);
-            moveX *= factor;
-            moveY *= factor;
-        }
-
-        x += moveX * SPEED * deltaTime;
-        y += moveY * SPEED * deltaTime;
+        clampX(0, world.getWidth() - size);
+        clampY(0, world.getHeight() - size);
     }
 
     public void clampX(double min, double max) {
@@ -46,38 +32,5 @@ public class Player {
     public void clampY(double min, double max) {
         if (y < min) y = min;
         if (y > max) y = max;
-    }
-
-    public void moveX(double deltaTime) {
-        x += dx * SPEED * deltaTime;
-    }
-
-    public void moveY(double deltaTime) {
-        y += dy * SPEED * deltaTime;
-    }
-
-    public void setX(double x) {
-        this.x = (int) x;
-    }
-
-    public void setY(double y) {
-        this.y = (int) y;
-    }
-
-    public void setPosition(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public int getSize() {
-        return SIZE;
     }
 }

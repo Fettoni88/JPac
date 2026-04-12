@@ -1,7 +1,6 @@
 package ch.fettoni.rpg.ui;
 
-import ch.fettoni.rpg.world.Player;
-import ch.fettoni.rpg.world.TileMap;
+import ch.fettoni.rpg.world.*;
 
 import javax.swing.JPanel;
 import java.awt.Color;
@@ -14,9 +13,25 @@ public class GamePanel extends JPanel {
 
     private final Player player;
     private final TileRenderer tileRenderer;
+    private final TileMap map;
+    private final World world;
+    private double cameraX = 0;
+    private double cameraY = 0;
 
-    public GamePanel(Player player, TileMap map) {
+    private boolean upPressed, downPressed, leftPressed, rightPressed;
+
+    public void updateInput() {
+        int dx = (rightPressed ? 1 : 0) - (leftPressed ? 1 : 0);
+        int dy = (downPressed ? 1 : 0) - (upPressed ? 1 : 0);
+
+        player.setDx(dx);
+        player.setDy(dy);
+    }
+
+    public GamePanel(Player player, TileMap map, World world) {
         this.player = player;
+        this.world = world;
+        this.map = map;
         this.tileRenderer = new TileRenderer(map);
 
         setPreferredSize(new Dimension(800, 600));
@@ -28,21 +43,20 @@ public class GamePanel extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT -> player.setDx(1);
-                    case KeyEvent.VK_LEFT -> player.setDx(-1);
-                    case KeyEvent.VK_DOWN -> player.setDy(1);
-                    case KeyEvent.VK_UP -> player.setDy(-1);
+                    case KeyEvent.VK_RIGHT -> rightPressed = true;
+                    case KeyEvent.VK_LEFT  -> leftPressed = true;
+                    case KeyEvent.VK_DOWN  -> downPressed = true;
+                    case KeyEvent.VK_UP    -> upPressed = true;
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT,
-                         KeyEvent.VK_LEFT -> player.setDx(0);
-
-                    case KeyEvent.VK_DOWN,
-                         KeyEvent.VK_UP -> player.setDy(0);
+                    case KeyEvent.VK_RIGHT -> rightPressed = false;
+                    case KeyEvent.VK_LEFT  -> leftPressed = false;
+                    case KeyEvent.VK_DOWN  -> downPressed = false;
+                    case KeyEvent.VK_UP    -> upPressed = false;
                 }
             }
         });
@@ -52,15 +66,43 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        tileRenderer.render(g);
+        double targetX = player.getX() - getWidth() / 2.0;
+        double targetY = player.getY() - getHeight() / 2.0;
 
-        g.setColor(Color.WHITE);
-        g.fillRect(
-                (int) player.getX(),
-                (int) player.getY(),
-                player.getSize(),
-                player.getSize()
-        );
+        double smoothing = 0.05;
+
+        cameraX += (targetX - cameraX) * smoothing;
+        cameraY += (targetY - cameraY) * smoothing;
+
+        int worldWidth = map.getCols() * map.getTileSize();
+        int worldHeight = map.getRows() * map.getTileSize();
+
+        double maxCameraX = Math.max(0, worldWidth - getWidth());
+        double maxCameraY = Math.max(0, worldHeight - getHeight());
+
+        cameraX = Math.max(0, cameraX);
+        cameraY = Math.max(0, cameraY);
+
+        cameraX = Math.min(maxCameraX, cameraX);
+        cameraY = Math.min(maxCameraY, cameraY);
+
+        int camX = (int) cameraX;
+        int camY = (int) cameraY;
+
+        tileRenderer.render(g, camX, camY, getWidth(), getHeight());
+
+        for (Entity e : world.getEntities()) {
+            int screenX = (int) e.getX() - camX;
+            int screenY = (int) e.getY() - camY;
+
+            if (e instanceof Player) {
+                g.setColor(Color.WHITE);
+            } else {
+                g.setColor(Color.RED);
+            }
+
+            g.fillRect(screenX, screenY, e.getSize(), e.getSize());
+        }
     }
 
 }

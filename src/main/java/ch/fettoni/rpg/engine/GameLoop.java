@@ -12,12 +12,10 @@ public class GameLoop implements Runnable {
     private Thread thread;
 
     private final GamePanel panel;
-    private final Player player;
     private final World world;
 
-    public GameLoop(GamePanel panel, Player player, World world) {
+    public GameLoop(GamePanel panel, World world) {
         this.panel = panel;
-        this.player = player;
         this.world = world;
     }
 
@@ -59,6 +57,7 @@ public class GameLoop implements Runnable {
     }
 
     private void update(double deltaTime) {
-        world.update(player, deltaTime);
+        panel.updateInput();
+        world.update(deltaTime);
     }
 }
