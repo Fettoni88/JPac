@@ -1,6 +1,6 @@
 package ffhs.jpac.ui;
 
-import ch.fettoni.rpg.world.*;
+import ffhs.jpac.world.*;
 import ffhs.jpac.world.Entity;
 import ffhs.jpac.world.Player;
 import ffhs.jpac.world.TileMap;
