@@ -1,4 +1,4 @@
-package ch.fettoni.rpg.world;
+package ffhs.jpac.world;
 
 public abstract class MovingEntity extends Entity {
 

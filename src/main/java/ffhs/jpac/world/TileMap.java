@@ -1,4 +1,4 @@
-package ch.fettoni.rpg.world;
+package ffhs.jpac.world;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

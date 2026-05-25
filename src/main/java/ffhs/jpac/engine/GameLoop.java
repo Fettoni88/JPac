@@ -1,8 +1,7 @@
-package ch.fettoni.rpg.engine;
+package ffhs.jpac.engine;
 
-import ch.fettoni.rpg.ui.GamePanel;
-import ch.fettoni.rpg.world.Player;
-import ch.fettoni.rpg.world.World;
+import ffhs.jpac.ui.GamePanel;
+import ffhs.jpac.world.World;
 
 public class GameLoop implements Runnable {
 

@@ -1,6 +1,6 @@
-package ch.fettoni.rpg;
+package ffhs.jpac;
 
-import ch.fettoni.rpg.ui.GameWindow;
+import ffhs.jpac.ui.GameWindow;
 
 public class GameApplication {
 

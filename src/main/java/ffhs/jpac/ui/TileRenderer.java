@@ -1,7 +1,7 @@
-package ch.fettoni.rpg.ui;
+package ffhs.jpac.ui;
 
-import ch.fettoni.rpg.world.TileMap;
-import ch.fettoni.rpg.world.TileType;
+import ffhs.jpac.world.TileMap;
+import ffhs.jpac.world.TileType;
 
 import java.awt.Color;
 import java.awt.Graphics;

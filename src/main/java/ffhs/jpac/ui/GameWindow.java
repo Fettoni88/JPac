@@ -1,10 +1,10 @@
-package ch.fettoni.rpg.ui;
+package ffhs.jpac.ui;
 
-import ch.fettoni.rpg.engine.GameLoop;
-import ch.fettoni.rpg.world.NPC;
-import ch.fettoni.rpg.world.Player;
-import ch.fettoni.rpg.world.TileMap;
-import ch.fettoni.rpg.world.World;
+import ffhs.jpac.engine.GameLoop;
+import ffhs.jpac.world.NPC;
+import ffhs.jpac.world.Player;
+import ffhs.jpac.world.TileMap;
+import ffhs.jpac.world.World;
 
 import javax.swing.JFrame;
 

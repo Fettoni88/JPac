@@ -1,6 +1,10 @@
-package ch.fettoni.rpg.ui;
+package ffhs.jpac.ui;
 
 import ch.fettoni.rpg.world.*;
+import ffhs.jpac.world.Entity;
+import ffhs.jpac.world.Player;
+import ffhs.jpac.world.TileMap;
+import ffhs.jpac.world.World;
 
 import javax.swing.JPanel;
 import java.awt.Color;
