@@ -1,17 +1,17 @@
 package ffhs.jpac.world;
 
-public class IdleState implements NPCState {
+public class IdleState implements GhostState {
 
     @Override
-    public void update(NPC npc, World world, double deltaTime) {
+    public void update(Ghost ghost, World world, double deltaTime) {
 
-        npc.decreaseTimer(deltaTime);
+        ghost.decreaseTimer(deltaTime);
 
-        if (npc.isTimerFinished()) {
-            npc.chooseRandomDirection();
-            npc.resetTimer();
+        if (ghost.isTimerFinished()) {
+            ghost.chooseRandomDirection();
+            ghost.resetTimer();
         }
 
-        npc.move(world, deltaTime);
+        ghost.move(world, deltaTime);
     }
 }

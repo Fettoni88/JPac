@@ -1,7 +1,7 @@
 package ffhs.jpac.ui;
 
 import ffhs.jpac.engine.GameLoop;
-import ffhs.jpac.world.NPC;
+import ffhs.jpac.world.Ghost;
 import ffhs.jpac.world.Player;
 import ffhs.jpac.world.TileMap;
 import ffhs.jpac.world.World;
@@ -16,7 +16,7 @@ public class GameWindow {
 
     public GameWindow() {
 
-        frame = new JFrame("RPG – Prototyp");
+        frame = new JFrame("JPac Prototype");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
@@ -28,10 +28,10 @@ public class GameWindow {
         World world = new World(worldWidth, worldHeight, map);
 
         Player player = new Player(300, 300);
-        NPC npc = new NPC(200, 200);
+        Ghost ghost = new Ghost(200, 200);
 
         world.addEntity(player);
-        world.addEntity(npc);
+        world.addEntity(ghost);
 
         world.setPlayer(player);
 

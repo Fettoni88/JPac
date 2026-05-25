@@ -1,13 +1,13 @@
 package ffhs.jpac.world;
 
-public class AttackState implements NPCState {
+public class AttackState implements GhostState {
 
     @Override
-    public void update(NPC npc, World world, double deltaTime) {
+    public void update(Ghost ghost, World world, double deltaTime) {
 
-        npc.stopMoving();
+        ghost.stopMoving();
 
         // Debug (später Animation / Damage)
-        System.out.println("NPC greift an!");
+        System.out.println("Ghost greift an!");
     }
 }

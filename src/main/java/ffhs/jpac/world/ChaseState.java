@@ -1,11 +1,11 @@
 package ffhs.jpac.world;
 
-public class ChaseState implements NPCState {
+public class ChaseState implements GhostState {
 
     @Override
-    public void update(NPC npc, World world, double deltaTime) {
+    public void update(Ghost ghost, World world, double deltaTime) {
 
-        npc.chasePlayer(world);
-        npc.move(world, deltaTime);
+        ghost.chasePlayer(world);
+        ghost.move(world, deltaTime);
     }
 }
