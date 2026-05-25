@@ -25,11 +25,7 @@ public class GamePanel extends JPanel {
     private boolean upPressed, downPressed, leftPressed, rightPressed;
 
     public void updateInput() {
-        int dx = (rightPressed ? 1 : 0) - (leftPressed ? 1 : 0);
-        int dy = (downPressed ? 1 : 0) - (upPressed ? 1 : 0);
-
-        player.setDx(dx);
-        player.setDy(dy);
+        // Input is handled via desiredDirection in keyPressed.
     }
 
     public GamePanel(Player player, TileMap map, World world) {
@@ -47,21 +43,16 @@ public class GamePanel extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT -> rightPressed = true;
-                    case KeyEvent.VK_LEFT  -> leftPressed = true;
-                    case KeyEvent.VK_DOWN  -> downPressed = true;
-                    case KeyEvent.VK_UP    -> upPressed = true;
+                    case KeyEvent.VK_RIGHT -> player.setDesiredDirection(Direction.RIGHT);
+                    case KeyEvent.VK_LEFT  -> player.setDesiredDirection(Direction.LEFT);
+                    case KeyEvent.VK_DOWN  -> player.setDesiredDirection(Direction.DOWN);
+                    case KeyEvent.VK_UP    -> player.setDesiredDirection(Direction.UP);
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT -> rightPressed = false;
-                    case KeyEvent.VK_LEFT  -> leftPressed = false;
-                    case KeyEvent.VK_DOWN  -> downPressed = false;
-                    case KeyEvent.VK_UP    -> upPressed = false;
-                }
+                // Pacman keeps moving in the current direction.
             }
         });
     }
@@ -94,6 +85,17 @@ public class GamePanel extends JPanel {
         int camY = (int) cameraY;
 
         tileRenderer.render(g, camX, camY, getWidth(), getHeight());
+
+        g.setColor(Color.YELLOW);
+
+        for (Pellet pellet : world.getPellets()) {
+            if (!pellet.isCollected()) {
+                int screenX = (int) pellet.getX() - camX;
+                int screenY = (int) pellet.getY() - camY;
+
+                g.fillOval(screenX, screenY, pellet.getSize(), pellet.getSize());
+            }
+        }
 
         for (Entity e : world.getEntities()) {
             int screenX = (int) e.getX() - camX;

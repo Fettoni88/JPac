@@ -1,10 +1,8 @@
 package ffhs.jpac.ui;
 
 import ffhs.jpac.engine.GameLoop;
-import ffhs.jpac.world.Ghost;
-import ffhs.jpac.world.Player;
-import ffhs.jpac.world.TileMap;
-import ffhs.jpac.world.World;
+import ffhs.jpac.world.*;
+
 
 import javax.swing.JFrame;
 
@@ -32,6 +30,10 @@ public class GameWindow {
 
         world.addEntity(player);
         world.addEntity(ghost);
+
+        world.addPellet(new Pellet(100, 100));
+        world.addPellet(new Pellet(150, 100));
+        world.addPellet(new Pellet(200, 100));
 
         world.setPlayer(player);
 

@@ -4,20 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.agent.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.ask.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.edit.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="Add Ghost class with state-based behavior for NPC interactions">
+      <change afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Pellet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/ChaseState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/ChaseState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/NPC.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/NPCState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Direction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +22,13 @@
     <persistenceIdMap>
       <entry key="_C:/Users/Fettoni/Desktop/FFHS/Modulen/JPL, Java Project Level/Semesterarbeit/JPac" value="3EDkVGtAdhkfbR3eSPXSMDOIYHS" />
     </persistenceIdMap>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -104,12 +105,34 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1779720551269</updated>
-      <workItem from="1779720553247" duration="1266000" />
+      <workItem from="1779720553247" duration="3407000" />
     </task>
+    <task id="LOCAL-00001" summary="Refactor NPC classes to Ghost classes and update related methods">
+      <option name="closed" value="true" />
+      <created>1779722714803</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1779722714803</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Add Ghost class with state-based behavior for NPC interactions">
+      <option name="closed" value="true" />
+      <created>1779722727553</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1779722727553</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Refactor NPC classes to Ghost classes and update related methods" />
+    <MESSAGE value="Add Ghost class with state-based behavior for NPC interactions" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Ghost class with state-based behavior for NPC interactions" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
