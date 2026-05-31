@@ -61,6 +61,7 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Kamera berechnen
         double targetX = player.getX() - getWidth() / 2.0;
         double targetY = player.getY() - getHeight() / 2.0;
 
@@ -84,8 +85,10 @@ public class GamePanel extends JPanel {
         int camX = (int) cameraX;
         int camY = (int) cameraY;
 
+        // Tiles rendern
         tileRenderer.render(g, camX, camY, getWidth(), getHeight());
 
+        // Pellets rendern
         g.setColor(Color.YELLOW);
 
         for (Pellet pellet : world.getPellets()) {
@@ -97,17 +100,29 @@ public class GamePanel extends JPanel {
             }
         }
 
+        // Entities rendern
         for (Entity e : world.getEntities()) {
             int screenX = (int) e.getX() - camX;
             int screenY = (int) e.getY() - camY;
 
             if (e instanceof Player) {
-                g.setColor(Color.WHITE);
+                g.setColor(Color.YELLOW);
             } else {
                 g.setColor(Color.RED);
             }
 
             g.fillRect(screenX, screenY, e.getSize(), e.getSize());
+        }
+
+        // HUD / UI immer ganz am Schluss zeichnen
+        g.setColor(Color.BLACK);
+        g.fillRect(10, 5, 130, 25);
+
+        g.setColor(Color.WHITE);
+        g.drawString("Score: " + world.getScore(), 20, 22);
+
+        if (world.areAllPelletsCollected()) {
+            g.drawString("YOU WIN!", getWidth() / 2 - 30, getHeight() / 2);
         }
     }
 

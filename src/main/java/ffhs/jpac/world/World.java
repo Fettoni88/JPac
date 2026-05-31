@@ -126,4 +126,29 @@ public class World {
                 && a.getY() < b.getY() + b.getSize()
                 && a.getY() + a.getSize() > b.getY();
     }
+
+    public void generatePellets() {
+        int tileSize = map.getTileSize();
+
+        for (int row = 0; row < map.getRows(); row++) {
+            for (int col = 0; col < map.getCols(); col++) {
+
+                if (!map.isWall(row, col)) {
+                    double x = col * tileSize + tileSize / 2.0 - 3;
+                    double y = row * tileSize + tileSize / 2.0 - 3;
+
+                    pellets.add(new Pellet(x, y));
+                }
+            }
+        }
+    }
+
+    public boolean areAllPelletsCollected() {
+        for (Pellet pellet : pellets) {
+            if (!pellet.isCollected()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

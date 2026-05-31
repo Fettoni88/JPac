@@ -24,16 +24,13 @@ public class GameWindow {
         int worldHeight = map.getRows() * map.getTileSize();
 
         World world = new World(worldWidth, worldHeight, map);
+        world.generatePellets();
 
         Player player = new Player(300, 300);
         Ghost ghost = new Ghost(200, 200);
 
         world.addEntity(player);
         world.addEntity(ghost);
-
-        world.addPellet(new Pellet(100, 100));
-        world.addPellet(new Pellet(150, 100));
-        world.addPellet(new Pellet(200, 100));
 
         world.setPlayer(player);
 
