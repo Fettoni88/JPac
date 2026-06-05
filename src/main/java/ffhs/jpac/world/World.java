@@ -12,6 +12,8 @@ public class World {
     private final List<Pellet> pellets = new ArrayList<>();
     private Player player;
     private int score = 0;
+    private boolean gameOver = false;
+    private GameState gameState = GameState.START;
 
     public int getScore() {
         return score;
@@ -59,14 +61,35 @@ public class World {
         return pellets;
     }
 
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void startGame() {
+        gameState = GameState.RUNNING;
+    }
+
     public void update(double deltaTime) {
 
+        if (gameState != GameState.RUNNING) {
+            return;
+        }
+
         checkPelletCollection();
+        checkGhostCollision();
+
+        if (areAllPelletsCollected()) {
+            gameState = GameState.WIN;
+        }
 
         for (Entity e : entities) {
             e.update(this, deltaTime);
 
         }
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
     }
 
     public boolean isColliding(Entity e) {
@@ -116,6 +139,18 @@ public class World {
             if (!pellet.isCollected() && isOverlapping(player, pellet)) {
                 pellet.collect();
                 score += 10;
+            }
+        }
+    }
+
+    private void checkGhostCollision() {
+        if (player == null) {
+            return;
+        }
+
+        for (Entity entity : entities) {
+            if (entity instanceof Ghost && isOverlapping(player, entity)) {
+                gameState = GameState.GAME_OVER;
             }
         }
     }

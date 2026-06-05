@@ -57,8 +57,22 @@ public class GamePanel extends JPanel {
         });
     }
 
+    private void renderStartScreen(Graphics g) {
+        g.setColor(Color.YELLOW);
+        g.setFont(g.getFont().deriveFont(48f));
+        g.drawString("JPAC", getWidth() / 2 - 70, 200);
+
+        g.setColor(Color.WHITE);
+        g.setFont(g.getFont().deriveFont(20f));
+        g.drawString("Press ENTER to Start", getWidth() / 2 - 100, 280);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
+        if (world.getGameState() == GameState.START) {
+            renderStartScreen(g);
+            return;
+        }
         super.paintComponent(g);
 
         // Kamera berechnen
@@ -123,6 +137,10 @@ public class GamePanel extends JPanel {
 
         if (world.areAllPelletsCollected()) {
             g.drawString("YOU WIN!", getWidth() / 2 - 30, getHeight() / 2);
+        }
+
+        if (world.isGameOver()) {
+            g.drawString("GAME OVER!", getWidth() / 2 - 40, getHeight() / 2);
         }
     }
 

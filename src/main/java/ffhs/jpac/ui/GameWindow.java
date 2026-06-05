@@ -27,10 +27,17 @@ public class GameWindow {
         world.generatePellets();
 
         Player player = new Player(300, 300);
-        Ghost ghost = new Ghost(200, 200);
+
+        Ghost redGhost = new Ghost(200, 200);
+        Ghost pinkGhost = new Ghost(240, 200);
+        Ghost blueGhost = new Ghost(200, 240);
+        Ghost orangeGhost = new Ghost(240, 240);
 
         world.addEntity(player);
-        world.addEntity(ghost);
+        world.addEntity(redGhost);
+        world.addEntity(pinkGhost);
+        world.addEntity(blueGhost);
+        world.addEntity(orangeGhost);
 
         world.setPlayer(player);
 
