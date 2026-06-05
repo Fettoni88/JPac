@@ -23,6 +23,7 @@ public class Ghost extends MovingEntity {
     private final double directionInterval = 2.0;
     private int lastDecisionRow = -1;
     private int lastDecisionCol = -1;
+    private boolean leftGhostHouse = false;
 
     public Ghost(double x, double y, Color color) {
         this(x, y, color, GhostPersonality.RED, 0);
@@ -53,6 +54,10 @@ public class Ghost extends MovingEntity {
         return releaseTimer >= releaseDelay;
     }
 
+    public boolean hasLeftGhostHouse() {
+        return leftGhostHouse;
+    }
+
     @Override
     public void reset() {
         super.reset();
@@ -61,6 +66,7 @@ public class Ghost extends MovingEntity {
         directionTimer = 0;
         lastDecisionRow = -1;
         lastDecisionCol = -1;
+        leftGhostHouse = false;
     }
 
     public void decreaseTimer(double deltaTime) {
@@ -142,6 +148,16 @@ public class Ghost extends MovingEntity {
             releaseTimer += deltaTime;
             stopMoving();
             return;
+        }
+
+        if (!leftGhostHouse) {
+            if (isInsideGhostHouse(world)) {
+                moveTowardGhostHouseExit(world, deltaTime);
+                return;
+            }
+
+            leftGhostHouse = true;
+            stopMoving();
         }
 
         updateState(world);
@@ -256,5 +272,38 @@ public class Ghost extends MovingEntity {
         int tileSize = world.getMap().getTileSize();
         lastDecisionRow = (int) ((y + size / 2.0) / tileSize);
         lastDecisionCol = (int) ((x + size / 2.0) / tileSize);
+    }
+
+    private boolean isInsideGhostHouse(World world) {
+        int tileSize = world.getMap().getTileSize();
+        int row = (int) ((y + size / 2.0) / tileSize);
+        int col = (int) ((x + size / 2.0) / tileSize);
+        return world.getMap().isGhostHouse(row, col);
+    }
+
+    private void moveTowardGhostHouseExit(World world, double deltaTime) {
+        int tileSize = world.getMap().getTileSize();
+        int[] exit = world.getMap().findGhostHouseExit();
+        double exitX = exit[3] * tileSize + tileSize / 2.0 - size / 2.0;
+        double exitY = exit[2] * tileSize + tileSize / 2.0 - size / 2.0;
+        double step = speed * deltaTime;
+
+        if (Math.abs(x - exitX) > step) {
+            setDirection(x < exitX ? Direction.RIGHT : Direction.LEFT);
+            move(world, deltaTime);
+            return;
+        }
+
+        x = exitX;
+
+        if (Math.abs(y - exitY) > step) {
+            setDirection(y < exitY ? Direction.DOWN : Direction.UP);
+            move(world, deltaTime);
+            return;
+        }
+
+        y = exitY;
+        leftGhostHouse = true;
+        stopMoving();
     }
 }

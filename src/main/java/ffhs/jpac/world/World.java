@@ -114,10 +114,10 @@ public class World {
         int topTile    = (int) (e.getY() / tileSize);
         int bottomTile = (int) ((e.getY() + e.getSize() - 1) / tileSize);
 
-        return map.isWall(topTile, leftTile)
-                || map.isWall(topTile, rightTile)
-                || map.isWall(bottomTile, leftTile)
-                || map.isWall(bottomTile, rightTile);
+        return isBlockedFor(e, topTile, leftTile)
+                || isBlockedFor(e, topTile, rightTile)
+                || isBlockedFor(e, bottomTile, leftTile)
+                || isBlockedFor(e, bottomTile, rightTile);
     }
 
     public boolean canMove(Entity entity, Direction direction) {
@@ -144,6 +144,15 @@ public class World {
         entity.setY(oldY);
 
         return canMove;
+    }
+
+    private boolean isBlockedFor(Entity entity, int row, int col) {
+        if (!map.isInside(row, col)) {
+            return true;
+        }
+
+        return map.isWall(row, col)
+                || entity instanceof Player && map.isGhostHouse(row, col);
     }
 
     private void checkPelletCollection() {
@@ -218,7 +227,7 @@ public class World {
 
                 if (map.isInside(nextRow, nextCol)
                         && !visited[nextRow][nextCol]
-                        && !map.isWall(nextRow, nextCol)) {
+                        && map.isPelletTile(nextRow, nextCol)) {
                     visited[nextRow][nextCol] = true;
                     openTiles.add(new int[]{nextRow, nextCol});
                 }

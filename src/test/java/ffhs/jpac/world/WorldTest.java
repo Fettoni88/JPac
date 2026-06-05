@@ -142,4 +142,17 @@ class WorldTest {
             return world.getMap().getTile(row, col) == TileType.GHOST_HOUSE;
         }));
     }
+
+    @Test
+    void playerTreatsGhostHouseAsBlockedButGhostDoesNot() {
+        World world = createWorld();
+        Player player = new Player(331, 363);
+        Ghost ghost = new Ghost(
+                331, 331, Color.RED, GhostPersonality.RED, 0
+        );
+
+        assertFalse(world.canMove(player, Direction.UP, 32));
+        assertTrue(world.canMove(ghost, Direction.UP, 32));
+        assertTrue(world.getMap().isGhostHouse(10, 10));
+    }
 }

@@ -32,15 +32,23 @@ public class Player extends MovingEntity {
     @Override
     public void update(World world, double deltaTime) {
         boolean directionChanged = desiredDirection != currentDirection;
+        boolean canTurn = currentDirection == Direction.NONE
+                || isOppositeDirection(desiredDirection, currentDirection)
+                || isCenteredOnTile(world, speed * deltaTime + 1);
 
-        if (directionChanged && world.canMove(this, desiredDirection)) {
+        if (directionChanged
+                && canTurn
+                && world.canMove(this, desiredDirection)) {
+            if (currentDirection != Direction.NONE) {
+                snapToTileCenter(world);
+            }
             currentDirection = desiredDirection;
         }
 
         if (world.canMove(this, currentDirection)) {
             dx = currentDirection.getDx();
             dy = currentDirection.getDy();
-            move(world, deltaTime, false);
+            move(world, deltaTime);
         } else {
             dx = 0;
             dy = 0;
@@ -57,4 +65,8 @@ public class Player extends MovingEntity {
         if (y > max) y = max;
     }
 
+    private boolean isOppositeDirection(Direction first, Direction second) {
+        return first.getDx() == -second.getDx()
+                && first.getDy() == -second.getDy();
+    }
 }

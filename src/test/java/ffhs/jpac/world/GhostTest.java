@@ -104,11 +104,12 @@ class GhostTest {
                 299, 267, Color.RED, GhostPersonality.RED, 0
         );
 
-        for (int frame = 0; frame < 240; frame++) {
+        for (int frame = 0; frame < 120; frame++) {
             red.update(world, 1.0 / 60.0);
         }
 
-        assertTrue(red.getX() > 320 || red.getY() > 330);
+        assertTrue(red.hasLeftGhostHouse());
+        assertTrue(red.getY() >= 352);
     }
 
     @Test
@@ -119,5 +120,30 @@ class GhostTest {
 
         assertEquals(GhostPersonality.ORANGE, orange.getPersonality());
         assertEquals(Color.ORANGE, orange.getColor());
+    }
+
+    @Test
+    void allGhostsUseTheirDelayThenLeaveThroughExit() {
+        Player player = new Player(43, 43);
+        World world = createWorld(player);
+        Ghost[] ghosts = {
+                new Ghost(299, 267, Color.RED, GhostPersonality.RED, 0),
+                new Ghost(331, 267, Color.PINK, GhostPersonality.PINK, 3),
+                new Ghost(363, 267, Color.CYAN, GhostPersonality.CYAN, 6),
+                new Ghost(331, 299, Color.ORANGE, GhostPersonality.ORANGE, 9)
+        };
+
+        for (int second = 0; second < 11; second++) {
+            for (int frame = 0; frame < 60; frame++) {
+                for (Ghost ghost : ghosts) {
+                    ghost.update(world, 1.0 / 60.0);
+                }
+            }
+        }
+
+        for (Ghost ghost : ghosts) {
+            assertTrue(ghost.isReleased());
+            assertTrue(ghost.hasLeftGhostHouse());
+        }
     }
 }

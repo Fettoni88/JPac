@@ -71,6 +71,10 @@ public class TileMap {
         return map[row][col].isSolid();
     }
 
+    public boolean isGhostHouse(int row, int col) {
+        return map[row][col] == TileType.GHOST_HOUSE;
+    }
+
     public boolean isPelletTile(int row, int col) {
         return map[row][col] == TileType.FLOOR;
     }
@@ -89,5 +93,32 @@ public class TileMap {
 
     public int getTileSize() {
         return TILE_SIZE;
+    }
+
+    public int[] findGhostHouseExit() {
+        for (int row = 0; row < getRows(); row++) {
+            for (int col = 0; col < getCols(); col++) {
+                if (!isGhostHouse(row, col)) {
+                    continue;
+                }
+
+                for (Direction direction : List.of(
+                        Direction.UP,
+                        Direction.DOWN,
+                        Direction.LEFT,
+                        Direction.RIGHT
+                )) {
+                    int outsideRow = row + direction.getDy();
+                    int outsideCol = col + direction.getDx();
+
+                    if (isInside(outsideRow, outsideCol)
+                            && getTile(outsideRow, outsideCol) == TileType.FLOOR) {
+                        return new int[]{row, col, outsideRow, outsideCol};
+                    }
+                }
+            }
+        }
+
+        throw new IllegalStateException("Ghost house has no exit");
     }
 }

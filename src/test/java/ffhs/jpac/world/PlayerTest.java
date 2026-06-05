@@ -51,21 +51,21 @@ class PlayerTest {
     }
 
     @Test
-    void playerCanTurnWithoutExactTileCenter() {
+    void playerWaitsForTileCenterBeforeTurning() {
         World world = createWorld();
-        Player player = new Player(43, 107);
+        Player player = new Player(43, 43);
         player.setDesiredDirection(Direction.RIGHT);
-        player.update(world, 0.03);
+        player.update(world, 0.05);
 
         player.setDesiredDirection(Direction.DOWN);
-        player.update(world, 0.03);
+        player.update(world, 0.01);
 
         assertTrue(player.getX() > 43);
-        assertTrue(player.getY() > 107);
+        assertEquals(43, player.getY(), 0.0001);
     }
 
     @Test
-    void playerKeepsOffsetInsideOpenCorridor() {
+    void playerSnapsToLaneCenterWhileMoving() {
         World world = createWorld();
         Player player = new Player(43, 110);
         player.setDesiredDirection(Direction.RIGHT);
@@ -73,7 +73,7 @@ class PlayerTest {
         player.update(world, 0.05);
 
         assertTrue(player.getX() > 43);
-        assertEquals(110, player.getY(), 0.0001);
+        assertEquals(107, player.getY(), 0.0001);
     }
 
     @Test
@@ -88,5 +88,23 @@ class PlayerTest {
 
         assertTrue(player.getX() > 350);
         assertEquals(427, player.getY(), 0.0001);
+    }
+
+    @Test
+    void playerCannotEnterGhostHouse() {
+        World world = createWorld();
+        Player player = new Player(331, 363);
+        player.setDesiredDirection(Direction.UP);
+
+        for (int frame = 0; frame < 30; frame++) {
+            player.update(world, 1.0 / 60.0);
+        }
+
+        int tileSize = world.getMap().getTileSize();
+        int row = (int) ((player.getY() + player.getSize() / 2.0) / tileSize);
+        int col = (int) ((player.getX() + player.getSize() / 2.0) / tileSize);
+
+        assertTrue(player.getY() >= 352);
+        assertTrue(!world.getMap().isGhostHouse(row, col));
     }
 }
