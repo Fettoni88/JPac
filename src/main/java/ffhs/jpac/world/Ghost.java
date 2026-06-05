@@ -1,38 +1,66 @@
 package ffhs.jpac.world;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class Ghost extends MovingEntity {
 
     private static final int SIZE = 10;
     private static final double SPEED = 100.0;
-    private final Color color;
-    private GhostState currentState;
+    private static final double ATTACK_RANGE = 20;
+    private static final double ORANGE_CHASE_RANGE = 150;
 
+    private final Color color;
+    private final GhostPersonality personality;
+    private final double releaseDelay;
+    private final Random random = new Random();
+    private GhostState currentState = new IdleState();
+    private double releaseTimer = 0;
     private double directionTimer = 0;
     private final double directionInterval = 2.0;
-
-    private final double chaseRange = 150;
-    private final double attackRange = 20;
-
-    private final Random random = new Random();
+    private int lastDecisionRow = -1;
+    private int lastDecisionCol = -1;
 
     public Ghost(double x, double y, Color color) {
+        this(x, y, color, GhostPersonality.RED, 0);
+    }
+
+    public Ghost(
+            double x,
+            double y,
+            Color color,
+            GhostPersonality personality,
+            double releaseDelay
+    ) {
         super(x, y, SIZE, SPEED);
         this.color = color;
-        currentState = new IdleState();
+        this.personality = personality;
+        this.releaseDelay = releaseDelay;
     }
 
     public Color getColor() {
         return color;
     }
 
+    public GhostPersonality getPersonality() {
+        return personality;
+    }
+
+    public boolean isReleased() {
+        return releaseTimer >= releaseDelay;
+    }
+
     @Override
     public void reset() {
         super.reset();
         currentState = new IdleState();
+        releaseTimer = 0;
         directionTimer = 0;
+        lastDecisionRow = -1;
+        lastDecisionCol = -1;
     }
 
     public void decreaseTimer(double deltaTime) {
@@ -52,6 +80,74 @@ public class Ghost extends MovingEntity {
         dy = 0;
     }
 
+    protected boolean chooseRandomDirection(World world) {
+        if (!canChooseDirection(world)) {
+            return false;
+        }
+
+        List<Direction> directions = getAvailableDirections(world);
+        if (directions.isEmpty()) {
+            stopMoving();
+            return false;
+        }
+
+        Collections.shuffle(directions, random);
+        setDirection(directions.get(0));
+        rememberDecisionTile(world);
+        return true;
+    }
+
+    protected void chasePlayer(World world) {
+        if (!canChooseDirection(world)) {
+            return;
+        }
+
+        Player player = world.getPlayer();
+        if (player == null) {
+            stopMoving();
+            return;
+        }
+
+        double diffX = player.getX() - x;
+        double diffY = player.getY() - y;
+        List<Direction> preferredDirections = new ArrayList<>();
+
+        if (personality == GhostPersonality.PINK) {
+            addVerticalDirection(preferredDirections, diffY);
+            addHorizontalDirection(preferredDirections, diffX);
+        } else if (Math.abs(diffX) >= Math.abs(diffY)) {
+            addHorizontalDirection(preferredDirections, diffX);
+            addVerticalDirection(preferredDirections, diffY);
+        } else {
+            addVerticalDirection(preferredDirections, diffY);
+            addHorizontalDirection(preferredDirections, diffX);
+        }
+
+        addFallbackDirections(preferredDirections);
+
+        for (Direction direction : preferredDirections) {
+            if (canReachNextTile(world, direction)) {
+                setDirection(direction);
+                rememberDecisionTile(world);
+                return;
+            }
+        }
+
+        stopMoving();
+    }
+
+    @Override
+    public void update(World world, double deltaTime) {
+        if (!isReleased()) {
+            releaseTimer += deltaTime;
+            stopMoving();
+            return;
+        }
+
+        updateState(world);
+        currentState.update(this, world, deltaTime);
+    }
+
     private void updateState(World world) {
         Player player = world.getPlayer();
         if (player == null) {
@@ -61,64 +157,104 @@ public class Ghost extends MovingEntity {
 
         double diffX = player.getX() - x;
         double diffY = player.getY() - y;
-
         double distance = Math.sqrt(diffX * diffX + diffY * diffY);
 
-        if (distance < attackRange) {
-            if (!(currentState instanceof AttackState)) {
-                currentState = new AttackState();
-            }
-        } else if (distance < chaseRange) {
-            if (!(currentState instanceof ChaseState)) {
-                currentState = new ChaseState();
-            }
+        if (distance < ATTACK_RANGE) {
+            currentState = new AttackState();
+        } else if (shouldChase(distance)) {
+            currentState = new ChaseState();
         } else {
-            if (!(currentState instanceof IdleState)) {
-                currentState = new IdleState();
-            }
+            currentState = new IdleState();
         }
     }
 
-    protected void chooseRandomDirection() {
-        dx = random.nextInt(3) - 1;
-        dy = random.nextInt(3) - 1;
+    private boolean shouldChase(double distance) {
+        return switch (personality) {
+            case RED, PINK -> true;
+            case CYAN -> false;
+            case ORANGE -> distance < ORANGE_CHASE_RANGE;
+        };
+    }
 
+    private boolean canChooseDirection(World world) {
         if (dx == 0 && dy == 0) {
-            dx = 1;
+            snapToTileCenter(world);
+            return true;
+        }
+
+        if (isCenteredOnTile(world, 2) && isOnNewDecisionTile(world)) {
+            snapToTileCenter(world);
+            return true;
+        }
+
+        return false;
+    }
+
+    private List<Direction> getAvailableDirections(World world) {
+        List<Direction> directions = new ArrayList<>();
+
+        for (Direction direction : List.of(
+                Direction.UP,
+                Direction.DOWN,
+                Direction.LEFT,
+                Direction.RIGHT
+        )) {
+            if (canReachNextTile(world, direction)) {
+                directions.add(direction);
+            }
+        }
+
+        return directions;
+    }
+
+    private void addHorizontalDirection(List<Direction> directions, double diffX) {
+        if (diffX != 0) {
+            directions.add(diffX > 0 ? Direction.RIGHT : Direction.LEFT);
         }
     }
 
-    protected void chasePlayer(World world) {
-        Player player = world.getPlayer();
-
-        double diffX = player.getX() - x;
-        double diffY = player.getY() - y;
-
-        double distance = Math.sqrt(diffX * diffX + diffY * diffY);
-
-        double stopDistance = 10;
-
-        if (distance < stopDistance) {
-            dx = 0;
-            dy = 0;
-            return;
-        }
-
-        dx = 0;
-        dy = 0;
-
-        if (Math.abs(diffX) > Math.abs(diffY)) {
-            dx = diffX > 0 ? 1 : -1;
-        } else {
-            dy = diffY > 0 ? 1 : -1;
+    private void addVerticalDirection(List<Direction> directions, double diffY) {
+        if (diffY != 0) {
+            directions.add(diffY > 0 ? Direction.DOWN : Direction.UP);
         }
     }
 
-    @Override
-    public void update(World world, double deltaTime) {
+    private void addFallbackDirections(List<Direction> directions) {
+        for (Direction direction : List.of(
+                Direction.UP,
+                Direction.DOWN,
+                Direction.LEFT,
+                Direction.RIGHT
+        )) {
+            if (!directions.contains(direction)) {
+                directions.add(direction);
+            }
+        }
+    }
 
-        updateState(world);
+    private void setDirection(Direction direction) {
+        dx = direction.getDx();
+        dy = direction.getDy();
+    }
 
-        currentState.update(this, world, deltaTime);
+    private boolean canReachNextTile(World world, Direction direction) {
+        return world.canMove(
+                this,
+                direction,
+                world.getMap().getTileSize()
+        );
+    }
+
+    private boolean isOnNewDecisionTile(World world) {
+        int tileSize = world.getMap().getTileSize();
+        int row = (int) ((y + size / 2.0) / tileSize);
+        int col = (int) ((x + size / 2.0) / tileSize);
+        return row != lastDecisionRow || col != lastDecisionCol;
+    }
+
+    private void rememberDecisionTile(World world) {
+        int tileSize = world.getMap().getTileSize();
+        lastDecisionRow = (int) ((y + size / 2.0) / tileSize);
+        lastDecisionCol = (int) ((x + size / 2.0) / tileSize);
     }
 }

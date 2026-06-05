@@ -1,6 +1,8 @@
 package ffhs.jpac.world;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Queue;
 import java.util.List;
 
 public class World {
@@ -72,13 +74,12 @@ public class World {
 
     public void restartGame() {
         score = 0;
-        pellets.clear();
-        generatePellets();
 
         for (Entity entity : entities) {
             entity.reset();
         }
 
+        generatePellets();
         gameState = GameState.START;
     }
 
@@ -120,7 +121,10 @@ public class World {
     }
 
     public boolean canMove(Entity entity, Direction direction) {
+        return canMove(entity, direction, 2);
+    }
 
+    public boolean canMove(Entity entity, Direction direction, double distance) {
         if (direction == Direction.NONE) {
             return false;
         }
@@ -128,8 +132,8 @@ public class World {
         double oldX = entity.getX();
         double oldY = entity.getY();
 
-        double testX = oldX + direction.getDx() * 2;
-        double testY = oldY + direction.getDy() * 2;
+        double testX = oldX + direction.getDx() * distance;
+        double testY = oldY + direction.getDy() * distance;
 
         entity.setX(testX);
         entity.setY(testY);
@@ -161,7 +165,9 @@ public class World {
         }
 
         for (Entity entity : entities) {
-            if (entity instanceof Ghost && isOverlapping(player, entity)) {
+            if (entity instanceof Ghost ghost
+                    && ghost.isReleased()
+                    && isOverlapping(player, ghost)) {
                 gameState = GameState.GAME_OVER;
             }
         }
@@ -175,16 +181,46 @@ public class World {
     }
 
     public void generatePellets() {
+        pellets.clear();
+
+        if (player == null) {
+            return;
+        }
+
         int tileSize = map.getTileSize();
+        int startCol = (int) ((player.getX() + player.getSize() / 2.0) / tileSize);
+        int startRow = (int) ((player.getY() + player.getSize() / 2.0) / tileSize);
+        boolean[][] visited = new boolean[map.getRows()][map.getCols()];
+        Queue<int[]> openTiles = new ArrayDeque<>();
 
-        for (int row = 0; row < map.getRows(); row++) {
-            for (int col = 0; col < map.getCols(); col++) {
+        visited[startRow][startCol] = true;
+        openTiles.add(new int[]{startRow, startCol});
 
-                if (!map.isWall(row, col)) {
-                    double x = col * tileSize + tileSize / 2.0 - 3;
-                    double y = row * tileSize + tileSize / 2.0 - 3;
+        while (!openTiles.isEmpty()) {
+            int[] tile = openTiles.remove();
+            int row = tile[0];
+            int col = tile[1];
 
-                    pellets.add(new Pellet(x, y));
+            if (map.isPelletTile(row, col)) {
+                double x = col * tileSize + tileSize / 2.0 - 3;
+                double y = row * tileSize + tileSize / 2.0 - 3;
+                pellets.add(new Pellet(x, y));
+            }
+
+            for (Direction direction : List.of(
+                    Direction.UP,
+                    Direction.DOWN,
+                    Direction.LEFT,
+                    Direction.RIGHT
+            )) {
+                int nextRow = row + direction.getDy();
+                int nextCol = col + direction.getDx();
+
+                if (map.isInside(nextRow, nextCol)
+                        && !visited[nextRow][nextCol]
+                        && !map.isWall(nextRow, nextCol)) {
+                    visited[nextRow][nextCol] = true;
+                    openTiles.add(new int[]{nextRow, nextCol});
                 }
             }
         }

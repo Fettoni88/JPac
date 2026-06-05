@@ -117,4 +117,29 @@ class WorldTest {
         assertEquals(GameState.WIN, world.getGameState());
         assertEquals(10, world.getScore());
     }
+
+    @Test
+    void pelletsOnlyUseReachableNormalFloorTiles() {
+        World world = createWorld();
+        Player player = new Player(331, 427);
+        world.setPlayer(player);
+
+        world.generatePellets();
+
+        int floorTileCount = 0;
+        for (int row = 0; row < world.getMap().getRows(); row++) {
+            for (int col = 0; col < world.getMap().getCols(); col++) {
+                if (world.getMap().isPelletTile(row, col)) {
+                    floorTileCount++;
+                }
+            }
+        }
+
+        assertEquals(floorTileCount, world.getPellets().size());
+        assertTrue(world.getPellets().stream().noneMatch(pellet -> {
+            int col = (int) (pellet.getX() / world.getMap().getTileSize());
+            int row = (int) (pellet.getY() / world.getMap().getTileSize());
+            return world.getMap().getTile(row, col) == TileType.GHOST_HOUSE;
+        }));
+    }
 }

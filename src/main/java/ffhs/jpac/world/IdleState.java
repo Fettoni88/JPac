@@ -7,8 +7,7 @@ public class IdleState implements GhostState {
 
         ghost.decreaseTimer(deltaTime);
 
-        if (ghost.isTimerFinished()) {
-            ghost.chooseRandomDirection();
+        if (ghost.isTimerFinished() && ghost.chooseRandomDirection(world)) {
             ghost.resetTimer();
         }
 

@@ -4,11 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="Implement direction handling and pellet collection mechanics">
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" afterDir="false" />
+    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/TileRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/TileRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/MovingEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/maps/map.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/maps/map.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/ui/GamePanelTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/ui/GamePanelTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/PlayerTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" afterDir="false" />
     </list>
@@ -56,6 +65,9 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.GameApplication.executor": "Run",
+    "JUnit.GamePanelTest.executor": "Run",
+    "JUnit.PlayerTest.executor": "Run",
+    "JUnit.WorldTest.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -71,7 +83,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.GameApplication">
     <configuration name="GameApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="ffhs.jpac.GameApplication" />
       <module name="jpac" />
@@ -85,9 +97,57 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="GamePanelTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jpac" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ffhs.jpac.ui.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="ffhs.jpac.ui" />
+      <option name="MAIN_CLASS_NAME" value="ffhs.jpac.ui.GamePanelTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PlayerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jpac" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ffhs.jpac.world.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="ffhs.jpac.world" />
+      <option name="MAIN_CLASS_NAME" value="ffhs.jpac.world.PlayerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WorldTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jpac" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ffhs.jpac.world.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="ffhs.jpac.world" />
+      <option name="MAIN_CLASS_NAME" value="ffhs.jpac.world.WorldTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Application.GameApplication" />
+        <item itemvalue="JUnit.WorldTest" />
+        <item itemvalue="JUnit.PlayerTest" />
+        <item itemvalue="JUnit.GamePanelTest" />
       </list>
     </recent_temporary>
   </component>
@@ -110,6 +170,7 @@
       <workItem from="1780224655265" duration="612000" />
       <workItem from="1780672878093" duration="2183000" />
       <workItem from="1780677851585" duration="124000" />
+      <workItem from="1780678381547" duration="1875000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor NPC classes to Ghost classes and update related methods">
       <option name="closed" value="true" />
@@ -135,7 +196,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779724772634</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls">
+      <option name="closed" value="true" />
+      <created>1780678587687</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1780678587687</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -145,7 +214,8 @@
     <MESSAGE value="Refactor NPC classes to Ghost classes and update related methods" />
     <MESSAGE value="Add Ghost class with state-based behavior for NPC interactions" />
     <MESSAGE value="Implement direction handling and pellet collection mechanics" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement direction handling and pellet collection mechanics" />
+    <MESSAGE value="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

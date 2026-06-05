@@ -25,14 +25,20 @@ public class GameWindow {
         int worldHeight = map.getRows() * map.getTileSize();
 
         World world = new World(worldWidth, worldHeight, map);
-        world.generatePellets();
+        Player player = new Player(331, 427);
 
-        Player player = new Player(300, 300);
-
-        Ghost redGhost = new Ghost(267, 235, Color.RED);
-        Ghost pinkGhost = new Ghost(331, 235, Color.PINK);
-        Ghost cyanGhost = new Ghost(395, 235, Color.CYAN);
-        Ghost orangeGhost = new Ghost(459, 235, Color.ORANGE);
+        Ghost redGhost = new Ghost(
+                299, 267, Color.RED, GhostPersonality.RED, 0
+        );
+        Ghost pinkGhost = new Ghost(
+                331, 267, Color.PINK, GhostPersonality.PINK, 3
+        );
+        Ghost cyanGhost = new Ghost(
+                363, 267, Color.CYAN, GhostPersonality.CYAN, 6
+        );
+        Ghost orangeGhost = new Ghost(
+                331, 299, Color.ORANGE, GhostPersonality.ORANGE, 9
+        );
 
         world.addEntity(player);
         world.addEntity(redGhost);
@@ -41,6 +47,7 @@ public class GameWindow {
         world.addEntity(orangeGhost);
 
         world.setPlayer(player);
+        world.generatePellets();
 
         panel = new GamePanel(player, map, world);
 

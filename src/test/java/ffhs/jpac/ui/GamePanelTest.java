@@ -13,6 +13,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GamePanelTest {
 
@@ -56,6 +57,31 @@ class GamePanelTest {
 
         assertEquals(GameState.START, world.getGameState());
         assertEquals(0, world.getScore());
+    }
+
+    @Test
+    void arrowKeyMovesPlayerAfterStartingGame() {
+        TileMap map = new TileMap("/maps/map.txt");
+        World world = new World(
+                map.getCols() * map.getTileSize(),
+                map.getRows() * map.getTileSize(),
+                map
+        );
+        Player player = new Player(331, 427);
+        world.setPlayer(player);
+        world.addEntity(player);
+        world.generatePellets();
+
+        GamePanel panel = new GamePanel(player, map, world);
+        pressKey(panel, KeyEvent.VK_ENTER, '\n');
+        pressKey(panel, KeyEvent.VK_RIGHT, KeyEvent.CHAR_UNDEFINED);
+
+        for (int frame = 0; frame < 10; frame++) {
+            world.update(1.0 / 60.0);
+        }
+
+        assertTrue(player.getX() > 350);
+        assertEquals(427, player.getY(), 0.0001);
     }
 
     private void pressKey(GamePanel panel, int keyCode, char keyChar) {

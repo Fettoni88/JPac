@@ -12,6 +12,7 @@ public class TileMap {
 
     private static final int FLOOR = 0;
     private static final int WALL = 1;
+    private static final int GHOST_HOUSE = 2;
 
     private final TileType[][] map;
 
@@ -39,6 +40,8 @@ public class TileMap {
 
                     if (value == WALL) {
                         row[i] = TileType.WALL;
+                    } else if (value == GHOST_HOUSE) {
+                        row[i] = TileType.GHOST_HOUSE;
                     } else {
                         row[i] = TileType.FLOOR;
                     }
@@ -66,6 +69,14 @@ public class TileMap {
 
     public boolean isWall(int row, int col) {
         return map[row][col].isSolid();
+    }
+
+    public boolean isPelletTile(int row, int col) {
+        return map[row][col] == TileType.FLOOR;
+    }
+
+    public boolean isInside(int row, int col) {
+        return row >= 0 && col >= 0 && row < getRows() && col < getCols();
     }
 
     public int getRows() {

@@ -42,6 +42,7 @@ public class TileRenderer {
                 switch (tile) {
                     case WALL -> g.setColor(Color.DARK_GRAY);
                     case FLOOR -> g.setColor(Color.GRAY);
+                    case GHOST_HOUSE -> g.setColor(new Color(70, 45, 70));
                 }
 
                 g.fillRect(screenX, screenY, tileSize, tileSize);

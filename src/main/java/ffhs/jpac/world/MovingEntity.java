@@ -20,39 +20,71 @@ public abstract class MovingEntity extends Entity {
     }
 
     protected void move(World world, double deltaTime) {
+        move(world, deltaTime, true);
+    }
+
+    protected void move(World world, double deltaTime, boolean lockToLane) {
+        keepCardinalDirection();
+        if (lockToLane) {
+            centerOnLane(world);
+        }
+
         double moveX = dx;
         double moveY = dy;
 
-        if (moveX != 0 || moveY != 0) {
-            double length = Math.sqrt(moveX * moveX + moveY * moveY);
-            moveX /= length;
-            moveY /= length;
-        }
-
+        double oldX = x;
         x += moveX * speed * deltaTime;
         if (world.isColliding(this)) {
-            int tileSize = world.getMap().getTileSize();
-
-            if (moveX > 0) {
-                int tileX = (int) ((x + size) / tileSize);
-                x = tileX * tileSize - size;
-            } else if (moveX < 0) {
-                int tileX = (int) (x / tileSize);
-                x = (tileX + 1) * tileSize;
-            }
+            x = oldX;
+            dx = 0;
         }
 
+        double oldY = y;
         y += moveY * speed * deltaTime;
         if (world.isColliding(this)) {
-            int tileSize = world.getMap().getTileSize();
+            y = oldY;
+            dy = 0;
+        }
+    }
 
-            if (moveY > 0) {
-                int tileY = (int) ((y + size) / tileSize);
-                y = tileY * tileSize - size;
-            } else if (moveY < 0) {
-                int tileY = (int) (y / tileSize);
-                y = (tileY + 1) * tileSize;
-            }
+    protected boolean isCenteredOnTile(World world, double tolerance) {
+        int tileSize = world.getMap().getTileSize();
+        double centerX = x + size / 2.0;
+        double centerY = y + size / 2.0;
+        double tileCenterX = nearestTileCenter(centerX, tileSize);
+        double tileCenterY = nearestTileCenter(centerY, tileSize);
+
+        return Math.abs(centerX - tileCenterX) <= tolerance
+                && Math.abs(centerY - tileCenterY) <= tolerance;
+    }
+
+    protected void snapToTileCenter(World world) {
+        int tileSize = world.getMap().getTileSize();
+        x = nearestTileCenter(x + size / 2.0, tileSize) - size / 2.0;
+        y = nearestTileCenter(y + size / 2.0, tileSize) - size / 2.0;
+    }
+
+    private void centerOnLane(World world) {
+        int tileSize = world.getMap().getTileSize();
+
+        if (dx != 0) {
+            y = nearestTileCenter(y + size / 2.0, tileSize) - size / 2.0;
+        } else if (dy != 0) {
+            x = nearestTileCenter(x + size / 2.0, tileSize) - size / 2.0;
+        }
+    }
+
+    private double nearestTileCenter(double center, int tileSize) {
+        return Math.round((center - tileSize / 2.0) / tileSize)
+                * tileSize + tileSize / 2.0;
+    }
+
+    private void keepCardinalDirection() {
+        if (dx != 0) {
+            dx = Integer.signum(dx);
+            dy = 0;
+        } else if (dy != 0) {
+            dy = Integer.signum(dy);
         }
     }
 }

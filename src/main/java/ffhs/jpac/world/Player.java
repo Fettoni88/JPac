@@ -31,19 +31,16 @@ public class Player extends MovingEntity {
 
     @Override
     public void update(World world, double deltaTime) {
+        boolean directionChanged = desiredDirection != currentDirection;
 
-        // Wenn gewünschte Richtung möglich ist, übernehmen
-        if (world.canMove(this, desiredDirection)) {
+        if (directionChanged && world.canMove(this, desiredDirection)) {
             currentDirection = desiredDirection;
         }
 
-        // Wenn aktuelle Richtung möglich ist, bewegen
         if (world.canMove(this, currentDirection)) {
             dx = currentDirection.getDx();
             dy = currentDirection.getDy();
-
-            snapToGridCenter(world, deltaTime);
-            move(world, deltaTime);
+            move(world, deltaTime, false);
         } else {
             dx = 0;
             dy = 0;
@@ -60,26 +57,4 @@ public class Player extends MovingEntity {
         if (y > max) y = max;
     }
 
-    private void snapToGridCenter(World world, double deltaTime) {
-        int tileSize = world.getMap().getTileSize();
-
-        double centerX = x + size / 2.0;
-        double centerY = y + size / 2.0;
-
-        int tileCol = (int) (centerX / tileSize);
-        int tileRow = (int) (centerY / tileSize);
-
-        double targetX = tileCol * tileSize + tileSize / 2.0 - size / 2.0;
-        double targetY = tileRow * tileSize + tileSize / 2.0 - size / 2.0;
-
-        double snapSpeed = 3.0;
-
-        if (currentDirection == Direction.LEFT || currentDirection == Direction.RIGHT) {
-            y += (targetY - y) * snapSpeed * deltaTime;
-        }
-
-        if (currentDirection == Direction.UP || currentDirection == Direction.DOWN) {
-            x += (targetX - x) * snapSpeed * deltaTime;
-        }
-    }
 }
