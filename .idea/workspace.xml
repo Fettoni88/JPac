@@ -4,22 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls">
+    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="feat: improve movement and ghost house behavior&#10;&#10;- allow flexible Pac-Man movement inside corridors&#10;- keep ghosts aligned to grid lanes&#10;- add ghost house and sequential release delays&#10;- add distinct ghost personalities&#10;- prevent ghosts from selecting blocked paths&#10;- fix ghost collision and attack behavior&#10;- generate pellets only on reachable floor tiles&#10;- add movement and ghost regression tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/TileRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/TileRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/MovingEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/maps/map.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/maps/map.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/ui/GamePanelTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/ui/GamePanelTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/PlayerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,6 +67,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.uml",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -170,7 +158,7 @@
       <workItem from="1780224655265" duration="612000" />
       <workItem from="1780672878093" duration="2183000" />
       <workItem from="1780677851585" duration="124000" />
-      <workItem from="1780678381547" duration="1875000" />
+      <workItem from="1780678381547" duration="5489000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor NPC classes to Ghost classes and update related methods">
       <option name="closed" value="true" />
@@ -204,7 +192,23 @@
       <option name="project" value="LOCAL" />
       <updated>1780678587687</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: improve movement and ghost house behavior&#10;&#10;- allow flexible Pac-Man movement inside corridors&#10;- keep ghosts aligned to grid lanes&#10;- add ghost house and sequential release delays&#10;- add distinct ghost personalities&#10;- prevent ghosts from selecting blocked paths&#10;- fix ghost collision and attack behavior&#10;- generate pellets only on reachable floor tiles&#10;- add movement and ghost regression tests">
+      <option name="closed" value="true" />
+      <created>1780680701007</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1780680701007</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: improve movement and ghost house behavior&#10;&#10;- allow flexible Pac-Man movement inside corridors&#10;- keep ghosts aligned to grid lanes&#10;- add ghost house and sequential release delays&#10;- add distinct ghost personalities&#10;- prevent ghosts from selecting blocked paths&#10;- fix ghost collision and attack behavior&#10;- generate pellets only on reachable floor tiles&#10;- add movement and ghost regression tests">
+      <option name="closed" value="true" />
+      <created>1780680706941</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1780680706941</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -215,7 +219,12 @@
     <MESSAGE value="Add Ghost class with state-based behavior for NPC interactions" />
     <MESSAGE value="Implement direction handling and pellet collection mechanics" />
     <MESSAGE value="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: add complete playable demo game flow&#10;- add four uniquely colored ghosts&#10;- add start, game over, and win screens&#10;- implement Enter-to-start and R-to-restart controls&#10;- reset score, pellets, entities, movement, and camera&#10;- add tests for game states and keyboard controls" />
+    <MESSAGE value="feat: improve movement and ghost house behavior&#10;&#10;- allow flexible Pac-Man movement inside corridors&#10;- keep ghosts aligned to grid lanes&#10;- add ghost house and sequential release delays&#10;- add distinct ghost personalities&#10;- prevent ghosts from selecting blocked paths&#10;- fix ghost collision and attack behavior&#10;- generate pellets only on reachable floor tiles&#10;- add movement and ghost regression tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: improve movement and ghost house behavior&#10;&#10;- allow flexible Pac-Man movement inside corridors&#10;- keep ghosts aligned to grid lanes&#10;- add ghost house and sequential release delays&#10;- add distinct ghost personalities&#10;- prevent ghosts from selecting blocked paths&#10;- fix ghost collision and attack behavior&#10;- generate pellets only on reachable floor tiles&#10;- add movement and ghost regression tests" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
