@@ -22,8 +22,6 @@ public class GamePanel extends JPanel {
     private double cameraX = 0;
     private double cameraY = 0;
 
-    private boolean upPressed, downPressed, leftPressed, rightPressed;
-
     public void updateInput() {
         // Input is handled via desiredDirection in keyPressed.
     }
@@ -42,6 +40,25 @@ public class GamePanel extends JPanel {
 
             @Override
             public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER
+                        && world.getGameState() == GameState.START) {
+                    world.startGame();
+                    return;
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_R
+                        && (world.getGameState() == GameState.GAME_OVER
+                        || world.getGameState() == GameState.WIN)) {
+                    world.restartGame();
+                    cameraX = 0;
+                    cameraY = 0;
+                    return;
+                }
+
+                if (world.getGameState() != GameState.RUNNING) {
+                    return;
+                }
+
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_RIGHT -> player.setDesiredDirection(Direction.RIGHT);
                     case KeyEvent.VK_LEFT  -> player.setDesiredDirection(Direction.LEFT);
@@ -60,20 +77,44 @@ public class GamePanel extends JPanel {
     private void renderStartScreen(Graphics g) {
         g.setColor(Color.YELLOW);
         g.setFont(g.getFont().deriveFont(48f));
-        g.drawString("JPAC", getWidth() / 2 - 70, 200);
+        drawCentered(g, "JPac", 200);
 
         g.setColor(Color.WHITE);
         g.setFont(g.getFont().deriveFont(20f));
-        g.drawString("Press ENTER to Start", getWidth() / 2 - 100, 280);
+        drawCentered(g, "Press ENTER to Start", 280);
+        drawCentered(g, "Controls: Arrow Keys", 320);
+    }
+
+    private void renderEndScreen(Graphics g, String title, boolean showFinalScore) {
+        g.setColor(new Color(0, 0, 0, 210));
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        g.setColor(Color.YELLOW);
+        g.setFont(g.getFont().deriveFont(42f));
+        drawCentered(g, title, 240);
+
+        g.setColor(Color.WHITE);
+        g.setFont(g.getFont().deriveFont(22f));
+        if (showFinalScore) {
+            drawCentered(g, "Final Score: " + world.getScore(), 290);
+        }
+        drawCentered(g, "Press R to Restart", 330);
+    }
+
+    private void drawCentered(Graphics g, String text, int y) {
+        int textWidth = g.getFontMetrics().stringWidth(text);
+        int x = (getWidth() - textWidth) / 2;
+        g.drawString(text, x, y);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
         if (world.getGameState() == GameState.START) {
             renderStartScreen(g);
             return;
         }
-        super.paintComponent(g);
 
         // Kamera berechnen
         double targetX = player.getX() - getWidth() / 2.0;
@@ -121,8 +162,10 @@ public class GamePanel extends JPanel {
 
             if (e instanceof Player) {
                 g.setColor(Color.YELLOW);
+            } else if (e instanceof Ghost ghost) {
+                g.setColor(ghost.getColor());
             } else {
-                g.setColor(Color.RED);
+                g.setColor(Color.WHITE);
             }
 
             g.fillRect(screenX, screenY, e.getSize(), e.getSize());
@@ -135,12 +178,10 @@ public class GamePanel extends JPanel {
         g.setColor(Color.WHITE);
         g.drawString("Score: " + world.getScore(), 20, 22);
 
-        if (world.areAllPelletsCollected()) {
-            g.drawString("YOU WIN!", getWidth() / 2 - 30, getHeight() / 2);
-        }
-
-        if (world.isGameOver()) {
-            g.drawString("GAME OVER!", getWidth() / 2 - 40, getHeight() / 2);
+        if (world.getGameState() == GameState.WIN) {
+            renderEndScreen(g, "YOU WIN!", true);
+        } else if (world.getGameState() == GameState.GAME_OVER) {
+            renderEndScreen(g, "GAME OVER", false);
         }
     }
 

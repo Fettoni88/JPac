@@ -1,22 +1,38 @@
 package ffhs.jpac.world;
 
+import java.awt.Color;
+import java.util.Random;
+
 public class Ghost extends MovingEntity {
 
     private static final int SIZE = 10;
     private static final double SPEED = 100.0;
+    private final Color color;
     private GhostState currentState;
 
     private double directionTimer = 0;
-    private double directionInterval = 2.0;
+    private final double directionInterval = 2.0;
 
-    private double chaseRange = 150;
-    private double attackRange = 20;
+    private final double chaseRange = 150;
+    private final double attackRange = 20;
 
-    private java.util.Random random = new java.util.Random();
+    private final Random random = new Random();
 
-    public Ghost(double x, double y) {
+    public Ghost(double x, double y, Color color) {
         super(x, y, SIZE, SPEED);
+        this.color = color;
         currentState = new IdleState();
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        currentState = new IdleState();
+        directionTimer = 0;
     }
 
     public void decreaseTimer(double deltaTime) {
@@ -38,6 +54,10 @@ public class Ghost extends MovingEntity {
 
     private void updateState(World world) {
         Player player = world.getPlayer();
+        if (player == null) {
+            currentState = new IdleState();
+            return;
+        }
 
         double diffX = player.getX() - x;
         double diffY = player.getY() - y;
@@ -48,13 +68,11 @@ public class Ghost extends MovingEntity {
             if (!(currentState instanceof AttackState)) {
                 currentState = new AttackState();
             }
-        }
-        else if (distance < chaseRange) {
+        } else if (distance < chaseRange) {
             if (!(currentState instanceof ChaseState)) {
                 currentState = new ChaseState();
             }
-        }
-        else {
+        } else {
             if (!(currentState instanceof IdleState)) {
                 currentState = new IdleState();
             }

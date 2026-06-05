@@ -12,6 +12,13 @@ public abstract class MovingEntity extends Entity {
         this.speed = speed;
     }
 
+    @Override
+    public void reset() {
+        super.reset();
+        dx = 0;
+        dy = 0;
+    }
+
     protected void move(World world, double deltaTime) {
         double moveX = dx;
         double moveY = dy;

@@ -23,6 +23,13 @@ public class Player extends MovingEntity {
     }
 
     @Override
+    public void reset() {
+        super.reset();
+        currentDirection = Direction.NONE;
+        desiredDirection = Direction.NONE;
+    }
+
+    @Override
     public void update(World world, double deltaTime) {
 
         // Wenn gewünschte Richtung möglich ist, übernehmen

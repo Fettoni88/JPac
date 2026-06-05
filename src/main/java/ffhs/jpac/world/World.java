@@ -12,7 +12,6 @@ public class World {
     private final List<Pellet> pellets = new ArrayList<>();
     private Player player;
     private int score = 0;
-    private boolean gameOver = false;
     private GameState gameState = GameState.START;
 
     public int getScore() {
@@ -66,7 +65,21 @@ public class World {
     }
 
     public void startGame() {
-        gameState = GameState.RUNNING;
+        if (gameState == GameState.START) {
+            gameState = GameState.RUNNING;
+        }
+    }
+
+    public void restartGame() {
+        score = 0;
+        pellets.clear();
+        generatePellets();
+
+        for (Entity entity : entities) {
+            entity.reset();
+        }
+
+        gameState = GameState.START;
     }
 
     public void update(double deltaTime) {
@@ -75,21 +88,20 @@ public class World {
             return;
         }
 
+        for (Entity e : entities) {
+            e.update(this, deltaTime);
+        }
+
         checkPelletCollection();
         checkGhostCollision();
 
-        if (areAllPelletsCollected()) {
+        if (gameState == GameState.RUNNING && areAllPelletsCollected()) {
             gameState = GameState.WIN;
-        }
-
-        for (Entity e : entities) {
-            e.update(this, deltaTime);
-
         }
     }
 
     public boolean isGameOver() {
-        return gameOver;
+        return gameState == GameState.GAME_OVER;
     }
 
     public boolean isColliding(Entity e) {

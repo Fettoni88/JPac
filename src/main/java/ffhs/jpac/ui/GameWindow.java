@@ -5,6 +5,7 @@ import ffhs.jpac.world.*;
 
 
 import javax.swing.JFrame;
+import java.awt.Color;
 
 public class GameWindow {
 
@@ -28,15 +29,15 @@ public class GameWindow {
 
         Player player = new Player(300, 300);
 
-        Ghost redGhost = new Ghost(200, 200);
-        Ghost pinkGhost = new Ghost(240, 200);
-        Ghost blueGhost = new Ghost(200, 240);
-        Ghost orangeGhost = new Ghost(240, 240);
+        Ghost redGhost = new Ghost(267, 235, Color.RED);
+        Ghost pinkGhost = new Ghost(331, 235, Color.PINK);
+        Ghost cyanGhost = new Ghost(395, 235, Color.CYAN);
+        Ghost orangeGhost = new Ghost(459, 235, Color.ORANGE);
 
         world.addEntity(player);
         world.addEntity(redGhost);
         world.addEntity(pinkGhost);
-        world.addEntity(blueGhost);
+        world.addEntity(cyanGhost);
         world.addEntity(orangeGhost);
 
         world.setPlayer(player);
