@@ -121,4 +121,29 @@ public class TileMap {
 
         throw new IllegalStateException("Ghost house has no exit");
     }
+
+    public int[] findGhostHouseCenter() {
+        int rowSum = 0;
+        int colSum = 0;
+        int tileCount = 0;
+
+        for (int row = 0; row < getRows(); row++) {
+            for (int col = 0; col < getCols(); col++) {
+                if (isGhostHouse(row, col)) {
+                    rowSum += row;
+                    colSum += col;
+                    tileCount++;
+                }
+            }
+        }
+
+        if (tileCount == 0) {
+            throw new IllegalStateException("Map has no ghost house");
+        }
+
+        return new int[]{
+                Math.round((float) rowSum / tileCount),
+                Math.round((float) colSum / tileCount)
+        };
+    }
 }

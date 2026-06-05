@@ -31,21 +31,26 @@ public class Player extends MovingEntity {
 
     @Override
     public void update(World world, double deltaTime) {
+        double movementDistance = Math.max(2, speed * deltaTime);
         boolean directionChanged = desiredDirection != currentDirection;
+        boolean currentDirectionBlocked = currentDirection != Direction.NONE
+                && !world.canMove(this, currentDirection, movementDistance);
         boolean canTurn = currentDirection == Direction.NONE
+                || currentDirectionBlocked
                 || isOppositeDirection(desiredDirection, currentDirection)
                 || isCenteredOnTile(world, speed * deltaTime + 1);
 
         if (directionChanged
                 && canTurn
-                && world.canMove(this, desiredDirection)) {
-            if (currentDirection != Direction.NONE) {
-                snapToTileCenter(world);
-            }
+                && canMoveFromTileCenter(
+                        world,
+                        desiredDirection,
+                        movementDistance
+                )) {
             currentDirection = desiredDirection;
         }
 
-        if (world.canMove(this, currentDirection)) {
+        if (world.canMove(this, currentDirection, movementDistance)) {
             dx = currentDirection.getDx();
             dy = currentDirection.getDy();
             move(world, deltaTime);

@@ -146,4 +146,22 @@ class GhostTest {
             assertTrue(ghost.hasLeftGhostHouse());
         }
     }
+
+    @Test
+    void ghostReleaseUsesCenterColumnBeforeDoorway() {
+        Player player = new Player(43, 43);
+        World world = createWorld(player);
+        Ghost red = new Ghost(
+                299, 267, Color.RED, GhostPersonality.RED, 0
+        );
+
+        for (int frame = 0; frame < 20; frame++) {
+            red.update(world, 1.0 / 60.0);
+        }
+
+        assertEquals(331, red.getX(), 0.0001);
+        assertTrue(red.getY() > 267);
+        assertTrue(red.getY() < 331);
+        assertFalse(red.hasLeftGhostHouse());
+    }
 }

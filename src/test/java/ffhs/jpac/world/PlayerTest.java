@@ -65,15 +65,16 @@ class PlayerTest {
     }
 
     @Test
-    void playerSnapsToLaneCenterWhileMoving() {
+    void playerCorrectsTowardLaneCenterSmoothly() {
         World world = createWorld();
-        Player player = new Player(43, 110);
+        Player player = new Player(43, 115);
         player.setDesiredDirection(Direction.RIGHT);
 
-        player.update(world, 0.05);
+        player.update(world, 1.0 / 60.0);
 
         assertTrue(player.getX() > 43);
-        assertEquals(107, player.getY(), 0.0001);
+        assertTrue(player.getY() < 115);
+        assertTrue(player.getY() > 107);
     }
 
     @Test
@@ -106,5 +107,24 @@ class PlayerTest {
 
         assertTrue(player.getY() >= 352);
         assertTrue(!world.getMap().isGhostHouse(row, col));
+    }
+
+    @Test
+    void bufferedTurnWorksWhenCurrentDirectionIsBlocked() {
+        World world = createWorld();
+        Player player = new Player(267, 75);
+        player.setDesiredDirection(Direction.UP);
+
+        for (int frame = 0; frame < 20; frame++) {
+            player.update(world, 1.0 / 60.0);
+        }
+
+        double blockedY = player.getY();
+
+        player.setDesiredDirection(Direction.LEFT);
+        player.update(world, 1.0 / 60.0);
+
+        assertTrue(player.getX() < 267);
+        assertEquals(blockedY, player.getY(), 2);
     }
 }
