@@ -151,8 +151,19 @@ public class World {
             return true;
         }
 
-        return map.isWall(row, col)
-                || entity instanceof Player && map.isGhostHouse(row, col);
+        if (map.isWall(row, col)) {
+            return true;
+        }
+
+        if (!map.isGhostHouse(row, col)) {
+            return false;
+        }
+
+        if (entity instanceof Player) {
+            return true;
+        }
+
+        return entity instanceof Ghost ghost && ghost.hasLeftGhostHouse();
     }
 
     private void checkPelletCollection() {

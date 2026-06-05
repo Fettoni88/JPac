@@ -144,7 +144,7 @@ class WorldTest {
     }
 
     @Test
-    void playerTreatsGhostHouseAsBlockedButGhostDoesNot() {
+    void playerTreatsGhostHouseAsBlockedButUnreleasedGhostDoesNot() {
         World world = createWorld();
         Player player = new Player(331, 363);
         Ghost ghost = new Ghost(
@@ -154,5 +154,26 @@ class WorldTest {
         assertFalse(world.canMove(player, Direction.UP, 32));
         assertTrue(world.canMove(ghost, Direction.UP, 32));
         assertTrue(world.getMap().isGhostHouse(10, 10));
+    }
+
+    @Test
+    void releasedGhostTreatsGhostHouseAsBlocked() {
+        World world = createWorld();
+        Player player = new Player(43, 43);
+        Ghost ghost = new Ghost(
+                331, 299, Color.RED, GhostPersonality.RED, 0
+        );
+        world.setPlayer(player);
+
+        for (int frame = 0; frame < 120 && !ghost.hasLeftGhostHouse(); frame++) {
+            ghost.update(world, 1.0 / 60.0);
+        }
+
+        assertTrue(ghost.hasLeftGhostHouse());
+
+        ghost.setX(331);
+        ghost.setY(363);
+
+        assertFalse(world.canMove(ghost, Direction.UP, 32));
     }
 }
