@@ -1,9 +1,12 @@
 package ffhs.jpac.world;
 
+import ffhs.jpac.persistence.HighscoreEntry;
+import ffhs.jpac.persistence.HighscoreManager;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Queue;
 import java.util.List;
+import java.util.Queue;
 
 public class World {
 
@@ -12,9 +15,13 @@ public class World {
     private final TileMap map;
     private final List<Entity> entities = new ArrayList<>();
     private final List<Pellet> pellets = new ArrayList<>();
+    private final String playerName;
+    private final HighscoreManager highscoreManager;
+    private List<HighscoreEntry> highscores;
     private Player player;
     private int score = 0;
     private GameState gameState = GameState.START;
+    private boolean highscoreSaved;
 
     public int getScore() {
         return score;
@@ -29,9 +36,26 @@ public class World {
     }
 
     public World(int width, int height, TileMap map) {
+        this(width, height, map, "Player");
+    }
+
+    public World(int width, int height, TileMap map, String playerName) {
+        this(width, height, map, playerName, new HighscoreManager());
+    }
+
+    public World(
+            int width,
+            int height,
+            TileMap map,
+            String playerName,
+            HighscoreManager highscoreManager
+    ) {
         this.width = width;
         this.height = height;
         this.map = map;
+        this.playerName = normalizePlayerName(playerName);
+        this.highscoreManager = highscoreManager;
+        this.highscores = highscoreManager.loadHighscores();
     }
 
     public int getWidth() {
@@ -44,6 +68,17 @@ public class World {
 
     public TileMap getMap() {
         return map;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public HighscoreEntry getBestHighscore() {
+        if (highscores.isEmpty()) {
+            return null;
+        }
+        return highscores.getFirst();
     }
 
     public void addEntity(Entity entity) {
@@ -74,6 +109,7 @@ public class World {
 
     public void restartGame() {
         score = 0;
+        highscoreSaved = false;
 
         for (Entity entity : entities) {
             entity.reset();
@@ -98,7 +134,24 @@ public class World {
 
         if (gameState == GameState.RUNNING && areAllPelletsCollected()) {
             gameState = GameState.WIN;
+            saveHighscore();
         }
+    }
+
+    private void saveHighscore() {
+        if (highscoreSaved) {
+            return;
+        }
+
+        highscores = highscoreManager.addScore(playerName, score);
+        highscoreSaved = true;
+    }
+
+    private String normalizePlayerName(String name) {
+        if (name == null || name.isBlank()) {
+            return "Player";
+        }
+        return name.trim();
     }
 
     public boolean isGameOver() {

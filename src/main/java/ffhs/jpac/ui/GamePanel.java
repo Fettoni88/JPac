@@ -1,5 +1,6 @@
 package ffhs.jpac.ui;
 
+import ffhs.jpac.persistence.HighscoreEntry;
 import ffhs.jpac.world.*;
 import ffhs.jpac.world.Entity;
 import ffhs.jpac.world.Player;
@@ -173,10 +174,20 @@ public class GamePanel extends JPanel {
 
         // HUD / UI immer ganz am Schluss zeichnen
         g.setColor(Color.BLACK);
-        g.fillRect(10, 5, 130, 25);
+        g.fillRect(10, 5, 220, 45);
 
         g.setColor(Color.WHITE);
         g.drawString("Score: " + world.getScore(), 20, 22);
+
+        HighscoreEntry bestHighscore = world.getBestHighscore();
+        if (bestHighscore != null) {
+            g.drawString(
+                    "Best: " + bestHighscore.getName()
+                            + " " + bestHighscore.getScore(),
+                    20,
+                    42
+            );
+        }
 
         if (world.getGameState() == GameState.WIN) {
             renderEndScreen(g, "YOU WIN!", true);

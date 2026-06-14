@@ -1,8 +1,14 @@
 package ffhs.jpac.world;
 
+import ffhs.jpac.persistence.HighscoreEntry;
+import ffhs.jpac.persistence.HighscoreManager;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,8 +21,20 @@ class WorldTest {
         return new World(
                 map.getCols() * map.getTileSize(),
                 map.getRows() * map.getTileSize(),
-                map
+                map,
+                "Player",
+                createHighscoreManager()
         );
+    }
+
+    private HighscoreManager createHighscoreManager() {
+        try {
+            Path file = Files.createTempFile("jpac-world-highscores", ".json");
+            Files.deleteIfExists(file);
+            return new HighscoreManager(file);
+        } catch (IOException exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     @Test
@@ -116,6 +134,35 @@ class WorldTest {
 
         assertEquals(GameState.WIN, world.getGameState());
         assertEquals(10, world.getScore());
+    }
+
+    @Test
+    void winningSavesPlayerHighscoreOnlyOnce() throws IOException {
+        TileMap map = new TileMap("/maps/map.txt");
+        Path file = Files.createTempFile("jpac-win-highscores", ".json");
+        Files.deleteIfExists(file);
+        HighscoreManager manager = new HighscoreManager(file);
+        World world = new World(
+                map.getCols() * map.getTileSize(),
+                map.getRows() * map.getTileSize(),
+                map,
+                "  Necib  ",
+                manager
+        );
+        Player player = new Player(43, 43);
+        world.setPlayer(player);
+        world.addEntity(player);
+        world.addPellet(new Pellet(45, 45));
+        world.startGame();
+
+        world.update(0.0);
+        world.update(0.0);
+
+        List<HighscoreEntry> highscores = manager.loadHighscores();
+        assertEquals("Necib", world.getPlayerName());
+        assertEquals(1, highscores.size());
+        assertEquals("Necib", highscores.get(0).getName());
+        assertEquals(10, highscores.get(0).getScore());
     }
 
     @Test
