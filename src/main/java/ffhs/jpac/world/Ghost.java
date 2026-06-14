@@ -19,8 +19,6 @@ public class Ghost extends MovingEntity {
     private final Random random = new Random();
     private GhostState currentState = new IdleState();
     private double releaseTimer = 0;
-    private double directionTimer = 0;
-    private final double directionInterval = 2.0;
     private int lastDecisionRow = -1;
     private int lastDecisionCol = -1;
     private boolean leftGhostHouse = false;
@@ -51,6 +49,10 @@ public class Ghost extends MovingEntity {
         return personality;
     }
 
+    public double getReleaseDelay() {
+        return releaseDelay;
+    }
+
     public boolean isReleased() {
         return releaseTimer >= releaseDelay;
     }
@@ -64,23 +66,10 @@ public class Ghost extends MovingEntity {
         super.reset();
         currentState = new IdleState();
         releaseTimer = 0;
-        directionTimer = 0;
         lastDecisionRow = -1;
         lastDecisionCol = -1;
         leftGhostHouse = false;
         releasePathStep = 0;
-    }
-
-    public void decreaseTimer(double deltaTime) {
-        directionTimer -= deltaTime;
-    }
-
-    public boolean isTimerFinished() {
-        return directionTimer <= 0;
-    }
-
-    public void resetTimer() {
-        directionTimer = directionInterval;
     }
 
     public void stopMoving() {
@@ -88,7 +77,7 @@ public class Ghost extends MovingEntity {
         dy = 0;
     }
 
-    protected boolean chooseRandomDirection(World world) {
+    protected boolean chooseIdleDirection(World world) {
         if (!canChooseDirection(world)) {
             return false;
         }
@@ -99,8 +88,22 @@ public class Ghost extends MovingEntity {
             return false;
         }
 
-        Collections.shuffle(directions, random);
-        setDirection(directions.get(0));
+        Direction oppositeDirection = getDirection().opposite();
+        List<Direction> forwardAndSideDirections = new ArrayList<>(
+                directions
+        );
+        forwardAndSideDirections.remove(oppositeDirection);
+
+        Direction nextDirection;
+        if (forwardAndSideDirections.isEmpty()) {
+            nextDirection = oppositeDirection;
+        } else {
+            Collections.shuffle(forwardAndSideDirections, random);
+            nextDirection = forwardAndSideDirections.getFirst();
+        }
+
+        snapToTileCenter(world);
+        setDirection(nextDirection);
         rememberDecisionTile(world);
         return true;
     }
@@ -246,7 +249,23 @@ public class Ghost extends MovingEntity {
         }
     }
 
-    private void setDirection(Direction direction) {
+    Direction getDirection() {
+        if (dx < 0) {
+            return Direction.LEFT;
+        }
+        if (dx > 0) {
+            return Direction.RIGHT;
+        }
+        if (dy < 0) {
+            return Direction.UP;
+        }
+        if (dy > 0) {
+            return Direction.DOWN;
+        }
+        return Direction.NONE;
+    }
+
+    void setDirection(Direction direction) {
         dx = direction.getDx();
         dy = direction.getDy();
     }
@@ -274,7 +293,10 @@ public class Ghost extends MovingEntity {
 
     private void followGhostHousePath(World world, double deltaTime) {
         int[] center = world.getMap().findGhostHouseCenter();
-        int[] exit = world.getMap().findGhostHouseExit();
+        int[] exit = world.getMap().findGhostHouseExit(
+                x + size / 2.0,
+                y + size / 2.0
+        );
         int[][] path = {
                 {center[0], center[1]},
                 {exit[0], exit[1]},

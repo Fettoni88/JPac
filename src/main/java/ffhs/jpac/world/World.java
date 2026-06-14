@@ -208,7 +208,7 @@ public class World {
                 GhostPersonality.CYAN,
                 GhostPersonality.ORANGE
         };
-        double[] releaseDelays = {0, 3, 6, 9};
+        double[] releaseDelays = {0, 5, 10, 15};
         List<MazePosition> ghostSpawns = map.getGhostSpawns();
 
         for (int index = 0; index < 4; index++) {
@@ -361,11 +361,24 @@ public class World {
         for (Entity entity : entities) {
             if (entity instanceof Ghost ghost
                     && ghost.isReleased()
+                    && isOutsideGhostHouse(ghost)
                     && isOverlapping(player, ghost)) {
                 endGame(GameState.GAME_OVER);
                 return;
             }
         }
+    }
+
+    private boolean isOutsideGhostHouse(Ghost ghost) {
+        if (ghost.hasLeftGhostHouse() || !map.hasGhostHouse()) {
+            return true;
+        }
+
+        double centerX = ghost.getX() + ghost.getSize() / 2.0;
+        double centerY = ghost.getY() + ghost.getSize() / 2.0;
+        int col = map.getTileColFromPixel(centerX);
+        int row = map.getTileRowFromPixel(centerY);
+        return map.isInside(row, col) && !map.isGhostHouse(row, col);
     }
 
     private boolean isOverlapping(Entity a, Entity b) {

@@ -173,6 +173,28 @@ public class TileMap {
         return TILE_SIZE;
     }
 
+    public int getTileColFromPixel(double pixelX) {
+        return (int) Math.floor(pixelX / TILE_SIZE);
+    }
+
+    public int getTileRowFromPixel(double pixelY) {
+        return (int) Math.floor(pixelY / TILE_SIZE);
+    }
+
+    public double getTileCenterX(int col) {
+        return col * TILE_SIZE + TILE_SIZE / 2.0;
+    }
+
+    public double getTileCenterY(int row) {
+        return row * TILE_SIZE + TILE_SIZE / 2.0;
+    }
+
+    public boolean isWalkableForPlayer(int row, int col) {
+        return isInside(row, col)
+                && !isWall(row, col)
+                && !isGhostHouse(row, col);
+    }
+
     public String getMazeId() {
         return mazeId;
     }
@@ -201,8 +223,23 @@ public class TileMap {
     }
 
     public int[] findGhostHouseExit() {
+        int[] center = findGhostHouseCenter();
+        return findGhostHouseExit(
+                getTileCenterX(center[1]),
+                getTileCenterY(center[0])
+        );
+    }
+
+    public int[] findGhostHouseExit(double pixelX, double pixelY) {
         if (!ghostHouseExits.isEmpty()) {
-            MazePosition exit = ghostHouseExits.getFirst();
+            int startRow = getTileRowFromPixel(pixelY);
+            int startCol = getTileColFromPixel(pixelX);
+            MazePosition exit = ghostHouseExits.stream()
+                    .min((first, second) -> Integer.compare(
+                            distance(startRow, startCol, first),
+                            distance(startRow, startCol, second)
+                    ))
+                    .orElseThrow();
 
             for (Direction direction : List.of(
                     Direction.UP,
@@ -259,6 +296,15 @@ public class TileMap {
         }
 
         throw new IllegalStateException("Ghost house has no exit");
+    }
+
+    private int distance(
+            int startRow,
+            int startCol,
+            MazePosition position
+    ) {
+        return Math.abs(startRow - position.row())
+                + Math.abs(startCol - position.col());
     }
 
     public int[] findGhostHouseCenter() {

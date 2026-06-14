@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -176,9 +177,15 @@ public final class MazeLoader {
     }
 
     private static void validateGhostHouse(List<String> pattern) {
+        List<MazePosition> houseTiles = new ArrayList<>();
+
         for (int row = 0; row < pattern.size(); row++) {
             for (int col = 0; col < pattern.get(row).length(); col++) {
                 char symbol = pattern.get(row).charAt(col);
+                if (symbol == 'H' || symbol == 'G') {
+                    houseTiles.add(new MazePosition(row, col));
+                }
+
                 if (symbol == 'E'
                         && !hasNeighbor(pattern, row, col, 'H', 'G')) {
                     throw new IllegalArgumentException(
@@ -192,8 +199,68 @@ public final class MazeLoader {
                             "Ghost spawn G must be inside the ghost house"
                     );
                 }
+
+                if (symbol == 'G'
+                        && hasNeighbor(pattern, row, col, 'G', 'G')) {
+                    throw new IllegalArgumentException(
+                            "Ghost spawn tiles G must not be adjacent"
+                    );
+                }
             }
         }
+
+        validateSingleGhostHouse(pattern, houseTiles);
+    }
+
+    private static void validateSingleGhostHouse(
+            List<String> pattern,
+            List<MazePosition> houseTiles
+    ) {
+        if (houseTiles.isEmpty()) {
+            throw new IllegalArgumentException("Maze has no ghost house");
+        }
+
+        Set<MazePosition> visited = new HashSet<>();
+        Queue<MazePosition> open = new ArrayDeque<>();
+        visited.add(houseTiles.getFirst());
+        open.add(houseTiles.getFirst());
+
+        while (!open.isEmpty()) {
+            MazePosition current = open.remove();
+            for (MazePosition neighbor : List.of(
+                    new MazePosition(current.row() - 1, current.col()),
+                    new MazePosition(current.row() + 1, current.col()),
+                    new MazePosition(current.row(), current.col() - 1),
+                    new MazePosition(current.row(), current.col() + 1)
+            )) {
+                if (isGhostHouseTile(pattern, neighbor)
+                        && visited.add(neighbor)) {
+                    open.add(neighbor);
+                }
+            }
+        }
+
+        if (visited.size() != houseTiles.size()) {
+            throw new IllegalArgumentException(
+                    "Maze must contain exactly one connected ghost house"
+            );
+        }
+    }
+
+    private static boolean isGhostHouseTile(
+            List<String> pattern,
+            MazePosition position
+    ) {
+        if (position.row() < 0
+                || position.row() >= MAZE_HEIGHT
+                || position.col() < 0
+                || position.col() >= MAZE_WIDTH) {
+            return false;
+        }
+
+        char symbol = pattern.get(position.row())
+                .charAt(position.col());
+        return symbol == 'H' || symbol == 'G';
     }
 
     private static boolean hasNeighbor(

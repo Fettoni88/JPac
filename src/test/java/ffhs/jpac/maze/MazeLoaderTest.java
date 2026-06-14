@@ -25,8 +25,9 @@ class MazeLoaderTest {
             assertEquals(MazeLoader.MAZE_WIDTH, tileMap.getCols());
             assertEquals(24, tileMap.getTileSize());
             assertEquals(1, countSymbol(mazeData, 'P'));
-            assertTrue(tileMap.getGhostSpawns().size() >= 4);
+            assertEquals(4, tileMap.getGhostSpawns().size());
             assertFalse(tileMap.getGhostHouseExits().isEmpty());
+            assertGhostSpawnsAreSeparated(tileMap);
             assertEquals("maze" + mazeNumber, tileMap.getMazeId());
             assertEquals("Maze " + mazeNumber, tileMap.getMazeName());
             assertFalse(tileMap.getPelletPositions().isEmpty());
@@ -38,6 +39,11 @@ class MazeLoaderTest {
             assertTrue(
                     tileMap.getGhostSpawns().stream()
                             .noneMatch(tileMap.getPelletPositions()::contains)
+            );
+            assertTrue(
+                    countPlayerDeadEnds(mazeData) <= 18,
+                    "Maze " + mazeNumber
+                            + " should favor loops over dead ends"
             );
         }
     }
@@ -126,9 +132,9 @@ class MazeLoaderTest {
         pattern.add("#".repeat(MazeLoader.MAZE_WIDTH));
         pattern.set(2, replaceSymbol(pattern.get(2), 2, 'P'));
         pattern.set(3, replaceSection(pattern.get(3), 9, "##E###"));
-        pattern.set(4, replaceSection(pattern.get(4), 9, "#HHHH#"));
-        pattern.set(5, replaceSection(pattern.get(5), 9, "#HGGH#"));
-        pattern.set(6, replaceSection(pattern.get(6), 9, "#HGGH#"));
+        pattern.set(4, replaceSection(pattern.get(4), 9, "#HGHG#"));
+        pattern.set(5, replaceSection(pattern.get(5), 9, "#HHHH#"));
+        pattern.set(6, replaceSection(pattern.get(6), 9, "#GHGH#"));
         pattern.set(7, replaceSection(pattern.get(7), 9, "######"));
 
         return pattern;
@@ -151,5 +157,48 @@ class MazeLoaderTest {
                 .flatMapToInt(String::chars)
                 .filter(character -> character == symbol)
                 .count();
+    }
+
+    private int countPlayerDeadEnds(MazeData mazeData) {
+        int deadEnds = 0;
+
+        for (int row = 1; row < MazeLoader.MAZE_HEIGHT - 1; row++) {
+            for (int col = 1; col < MazeLoader.MAZE_WIDTH - 1; col++) {
+                if (!isPlayerPath(mazeData, row, col)) {
+                    continue;
+                }
+
+                int connectedPaths = 0;
+                connectedPaths += isPlayerPath(mazeData, row - 1, col) ? 1 : 0;
+                connectedPaths += isPlayerPath(mazeData, row + 1, col) ? 1 : 0;
+                connectedPaths += isPlayerPath(mazeData, row, col - 1) ? 1 : 0;
+                connectedPaths += isPlayerPath(mazeData, row, col + 1) ? 1 : 0;
+
+                if (connectedPaths == 1) {
+                    deadEnds++;
+                }
+            }
+        }
+
+        return deadEnds;
+    }
+
+    private boolean isPlayerPath(MazeData mazeData, int row, int col) {
+        char symbol = mazeData.getPattern().get(row).charAt(col);
+        return symbol != '#' && symbol != 'H' && symbol != 'G';
+    }
+
+    private void assertGhostSpawnsAreSeparated(TileMap tileMap) {
+        for (MazePosition first : tileMap.getGhostSpawns()) {
+            for (MazePosition second : tileMap.getGhostSpawns()) {
+                if (first.equals(second)) {
+                    continue;
+                }
+
+                int distance = Math.abs(first.row() - second.row())
+                        + Math.abs(first.col() - second.col());
+                assertTrue(distance > 1);
+            }
+        }
     }
 }

@@ -83,6 +83,22 @@ class WorldTest {
     }
 
     @Test
+    void ghostInsideHouseDoesNotEndGameBeforeLeaving() {
+        World world = createWorld();
+        Player player = new Player(243, 243);
+        Ghost ghost = new Ghost(243, 243, Color.RED);
+        world.setPlayer(player);
+        world.addEntity(player);
+        world.addEntity(ghost);
+        world.addPellet(new Pellet(75, 43));
+        world.startGame();
+
+        world.update(0.0);
+
+        assertEquals(GameState.PLAYING, world.getGameState());
+    }
+
+    @Test
     void runningGameIsNotGameOver() {
         World world = createWorld();
         world.addPellet(new Pellet(43, 43));
@@ -307,6 +323,12 @@ class WorldTest {
         assertEquals(4, world.getEntities().stream()
                 .filter(Ghost.class::isInstance)
                 .count());
+        List<Double> releaseDelays = world.getEntities().stream()
+                .filter(Ghost.class::isInstance)
+                .map(Ghost.class::cast)
+                .map(Ghost::getReleaseDelay)
+                .toList();
+        assertEquals(List.of(0.0, 5.0, 10.0, 15.0), releaseDelays);
         assertEquals(
                 world.getMap().getPelletPositions().size(),
                 world.getPellets().size()

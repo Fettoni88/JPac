@@ -4,13 +4,7 @@ public class IdleState implements GhostState {
 
     @Override
     public void update(Ghost ghost, World world, double deltaTime) {
-
-        ghost.decreaseTimer(deltaTime);
-
-        if (ghost.isTimerFinished() && ghost.chooseRandomDirection(world)) {
-            ghost.resetTimer();
-        }
-
+        ghost.chooseIdleDirection(world);
         ghost.move(world, deltaTime);
     }
 }
