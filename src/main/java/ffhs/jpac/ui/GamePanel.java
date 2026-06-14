@@ -1,8 +1,11 @@
 package ffhs.jpac.ui;
 
 import ffhs.jpac.persistence.HighscoreEntry;
-import ffhs.jpac.world.*;
+import ffhs.jpac.world.Direction;
 import ffhs.jpac.world.Entity;
+import ffhs.jpac.world.GameState;
+import ffhs.jpac.world.Ghost;
+import ffhs.jpac.world.Pellet;
 import ffhs.jpac.world.Player;
 import ffhs.jpac.world.TileMap;
 import ffhs.jpac.world.World;
@@ -11,21 +14,32 @@ import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
 
 public class GamePanel extends JPanel {
+
+    private static final String[] MENU_OPTIONS = {
+            "Start",
+            "Highscore",
+            "Exit"
+    };
+    private static final int MENU_START_Y = 280;
+    private static final int MENU_SPACING = 60;
+    private static final int MAX_NAME_LENGTH = 20;
 
     private final Player player;
     private final TileRenderer tileRenderer;
     private final TileMap map;
     private final World world;
-    private double cameraX = 0;
-    private double cameraY = 0;
-
-    public void updateInput() {
-        // Input is handled via desiredDirection in keyPressed.
-    }
+    private final StringBuilder nameInput = new StringBuilder();
+    private int selectedMenuOption;
+    private double cameraX;
+    private double cameraY;
 
     public GamePanel(Player player, TileMap map, World world) {
         this.player = player;
@@ -38,89 +52,323 @@ public class GamePanel extends JPanel {
         setFocusable(true);
 
         addKeyListener(new KeyAdapter() {
-
             @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER
-                        && world.getGameState() == GameState.START) {
-                    world.startGame();
-                    return;
-                }
-
-                if (e.getKeyCode() == KeyEvent.VK_R
-                        && (world.getGameState() == GameState.GAME_OVER
-                        || world.getGameState() == GameState.WIN)) {
-                    world.restartGame();
-                    cameraX = 0;
-                    cameraY = 0;
-                    return;
-                }
-
-                if (world.getGameState() != GameState.RUNNING) {
-                    return;
-                }
-
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT -> player.setDesiredDirection(Direction.RIGHT);
-                    case KeyEvent.VK_LEFT  -> player.setDesiredDirection(Direction.LEFT);
-                    case KeyEvent.VK_DOWN  -> player.setDesiredDirection(Direction.DOWN);
-                    case KeyEvent.VK_UP    -> player.setDesiredDirection(Direction.UP);
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                // Pacman keeps moving in the current direction.
+            public void keyPressed(KeyEvent event) {
+                handleKeyPressed(event);
             }
         });
+
+        MouseAdapter menuMouseAdapter = new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                handleMenuMouseMoved(event);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                handleMenuMouseClicked(event);
+            }
+        };
+        addMouseMotionListener(menuMouseAdapter);
+        addMouseListener(menuMouseAdapter);
     }
 
-    private void renderStartScreen(Graphics g) {
-        g.setColor(Color.YELLOW);
-        g.setFont(g.getFont().deriveFont(48f));
-        drawCentered(g, "JPac", 200);
-
-        g.setColor(Color.WHITE);
-        g.setFont(g.getFont().deriveFont(20f));
-        drawCentered(g, "Press ENTER to Start", 280);
-        drawCentered(g, "Controls: Arrow Keys", 320);
+    public void updateInput() {
+        // Input is handled directly by the Swing listeners.
     }
 
-    private void renderEndScreen(Graphics g, String title, boolean showFinalScore) {
-        g.setColor(new Color(0, 0, 0, 210));
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        g.setColor(Color.YELLOW);
-        g.setFont(g.getFont().deriveFont(42f));
-        drawCentered(g, title, 240);
-
-        g.setColor(Color.WHITE);
-        g.setFont(g.getFont().deriveFont(22f));
-        if (showFinalScore) {
-            drawCentered(g, "Final Score: " + world.getScore(), 290);
+    private void handleKeyPressed(KeyEvent event) {
+        switch (world.getGameState()) {
+            case START_MENU -> handleMenuKeyPressed(event);
+            case NAME_INPUT -> handleNameInputKeyPressed(event);
+            case HIGHSCORE -> handleHighscoreKeyPressed(event);
+            case PLAYING -> handleGameplayKeyPressed(event);
+            case GAME_OVER, WIN -> handleEndScreenKeyPressed(event);
         }
-        drawCentered(g, "Press R to Restart", 330);
     }
 
-    private void drawCentered(Graphics g, String text, int y) {
-        int textWidth = g.getFontMetrics().stringWidth(text);
-        int x = (getWidth() - textWidth) / 2;
-        g.drawString(text, x, y);
+    private void handleMenuKeyPressed(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.VK_UP) {
+            selectedMenuOption =
+                    (selectedMenuOption - 1 + MENU_OPTIONS.length)
+                            % MENU_OPTIONS.length;
+            repaint();
+        } else if (event.getKeyCode() == KeyEvent.VK_DOWN) {
+            selectedMenuOption =
+                    (selectedMenuOption + 1) % MENU_OPTIONS.length;
+            repaint();
+        } else if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+            activateMenuOption(selectedMenuOption);
+        }
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (world.getGameState() == GameState.START) {
-            renderStartScreen(g);
+    private void handleNameInputKeyPressed(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            nameInput.setLength(0);
+            world.showStartMenu();
             return;
         }
 
-        // Kamera berechnen
+        if (event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            if (!nameInput.isEmpty()) {
+                nameInput.deleteCharAt(nameInput.length() - 1);
+            }
+            repaint();
+            return;
+        }
+
+        if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+            world.startGame(nameInput.toString());
+            nameInput.setLength(0);
+            resetCamera();
+            return;
+        }
+
+        char typedCharacter = event.getKeyChar();
+        if (!Character.isISOControl(typedCharacter)
+                && nameInput.length() < MAX_NAME_LENGTH) {
+            nameInput.append(typedCharacter);
+            repaint();
+        }
+    }
+
+    private void handleHighscoreKeyPressed(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.VK_ESCAPE
+                || event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            world.showStartMenu();
+        }
+    }
+
+    private void handleGameplayKeyPressed(KeyEvent event) {
+        switch (event.getKeyCode()) {
+            case KeyEvent.VK_RIGHT ->
+                    player.setDesiredDirection(Direction.RIGHT);
+            case KeyEvent.VK_LEFT ->
+                    player.setDesiredDirection(Direction.LEFT);
+            case KeyEvent.VK_DOWN ->
+                    player.setDesiredDirection(Direction.DOWN);
+            case KeyEvent.VK_UP ->
+                    player.setDesiredDirection(Direction.UP);
+            default -> {
+                // Other keys do not affect gameplay.
+            }
+        }
+    }
+
+    private void handleEndScreenKeyPressed(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.VK_R) {
+            world.restartGame();
+            selectedMenuOption = 0;
+            resetCamera();
+        }
+    }
+
+    private void handleMenuMouseMoved(MouseEvent event) {
+        if (world.getGameState() != GameState.START_MENU) {
+            return;
+        }
+
+        for (int index = 0; index < MENU_OPTIONS.length; index++) {
+            if (getMenuOptionBounds(index).contains(event.getPoint())) {
+                selectedMenuOption = index;
+                repaint();
+                return;
+            }
+        }
+    }
+
+    private void handleMenuMouseClicked(MouseEvent event) {
+        requestFocusInWindow();
+
+        if (world.getGameState() != GameState.START_MENU) {
+            return;
+        }
+
+        for (int index = 0; index < MENU_OPTIONS.length; index++) {
+            if (getMenuOptionBounds(index).contains(event.getPoint())) {
+                selectedMenuOption = index;
+                activateMenuOption(index);
+                return;
+            }
+        }
+    }
+
+    private Rectangle getMenuOptionBounds(int index) {
+        int y = MENU_START_Y + index * MENU_SPACING;
+        return new Rectangle(getWidth() / 2 - 140, y - 38, 280, 50);
+    }
+
+    private void activateMenuOption(int optionIndex) {
+        switch (optionIndex) {
+            case 0 -> {
+                nameInput.setLength(0);
+                world.showNameInput();
+            }
+            case 1 -> world.showHighscores();
+            case 2 -> System.exit(0);
+            default -> {
+                // The selected index always belongs to a menu option.
+            }
+        }
+    }
+
+    private void resetCamera() {
+        cameraX = 0;
+        cameraY = 0;
+    }
+
+    private void renderMainMenu(Graphics graphics) {
+        graphics.setColor(Color.YELLOW);
+        graphics.setFont(graphics.getFont().deriveFont(52f));
+        drawCentered(graphics, "JPac", 155);
+
+        for (int index = 0; index < MENU_OPTIONS.length; index++) {
+            boolean selected = index == selectedMenuOption;
+            graphics.setColor(selected ? Color.YELLOW : Color.WHITE);
+            graphics.setFont(graphics.getFont().deriveFont(
+                    selected ? 32f : 26f
+            ));
+
+            String option = selected
+                    ? "> " + MENU_OPTIONS[index] + " <"
+                    : MENU_OPTIONS[index];
+            drawCentered(
+                    graphics,
+                    option,
+                    MENU_START_Y + index * MENU_SPACING
+            );
+        }
+
+        graphics.setColor(Color.LIGHT_GRAY);
+        graphics.setFont(graphics.getFont().deriveFont(16f));
+        drawCentered(
+                graphics,
+                "Arrow keys / Enter or mouse",
+                500
+        );
+    }
+
+    private void renderNameInput(Graphics graphics) {
+        graphics.setColor(Color.YELLOW);
+        graphics.setFont(graphics.getFont().deriveFont(42f));
+        drawCentered(graphics, "Gib deinen Namen ein", 210);
+
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(getWidth() / 2 - 180, 260, 360, 52);
+
+        graphics.setColor(Color.BLACK);
+        graphics.setFont(graphics.getFont().deriveFont(24f));
+        String displayedName = nameInput + "_";
+        drawCentered(graphics, displayedName, 295);
+
+        graphics.setColor(Color.LIGHT_GRAY);
+        graphics.setFont(graphics.getFont().deriveFont(17f));
+        drawCentered(graphics, "Enter: Start    ESC: Zurueck", 360);
+    }
+
+    private void renderHighscoreScreen(Graphics graphics) {
+        graphics.setColor(Color.YELLOW);
+        graphics.setFont(graphics.getFont().deriveFont(42f));
+        drawCentered(graphics, "Highscores", 105);
+
+        List<HighscoreEntry> highscores = world.getHighscores();
+        graphics.setFont(graphics.getFont().deriveFont(22f));
+
+        if (highscores.isEmpty()) {
+            graphics.setColor(Color.WHITE);
+            drawCentered(graphics, "Noch keine Highscores", 260);
+        } else {
+            for (int index = 0; index < highscores.size(); index++) {
+                HighscoreEntry entry = highscores.get(index);
+                graphics.setColor(index == 0 ? Color.YELLOW : Color.WHITE);
+                String line = (index + 1) + ". "
+                        + entry.getName() + " - " + entry.getScore();
+                drawCentered(graphics, line, 155 + index * 34);
+            }
+        }
+
+        graphics.setColor(Color.LIGHT_GRAY);
+        graphics.setFont(graphics.getFont().deriveFont(16f));
+        drawCentered(graphics, "ESC oder Backspace: Zurueck", 550);
+    }
+
+    private void renderEndScreen(
+            Graphics graphics,
+            String title,
+            boolean showFinalScore
+    ) {
+        graphics.setColor(new Color(0, 0, 0, 210));
+        graphics.fillRect(0, 0, getWidth(), getHeight());
+
+        graphics.setColor(Color.YELLOW);
+        graphics.setFont(graphics.getFont().deriveFont(42f));
+        drawCentered(graphics, title, 240);
+
+        graphics.setColor(Color.WHITE);
+        graphics.setFont(graphics.getFont().deriveFont(22f));
+        if (showFinalScore) {
+            drawCentered(
+                    graphics,
+                    "Final Score: " + world.getScore(),
+                    290
+            );
+        }
+        drawCentered(graphics, "Press R for Main Menu", 330);
+    }
+
+    private void drawCentered(Graphics graphics, String text, int y) {
+        int textWidth = graphics.getFontMetrics().stringWidth(text);
+        int x = (getWidth() - textWidth) / 2;
+        graphics.drawString(text, x, y);
+    }
+
+    @Override
+    protected void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
+
+        switch (world.getGameState()) {
+            case START_MENU -> {
+                renderMainMenu(graphics);
+                return;
+            }
+            case NAME_INPUT -> {
+                renderNameInput(graphics);
+                return;
+            }
+            case HIGHSCORE -> {
+                renderHighscoreScreen(graphics);
+                return;
+            }
+            default -> {
+                // Gameplay and end screens render the world.
+            }
+        }
+
+        updateCamera();
+        int camX = (int) cameraX;
+        int camY = (int) cameraY;
+
+        tileRenderer.render(
+                graphics,
+                camX,
+                camY,
+                getWidth(),
+                getHeight()
+        );
+        renderPellets(graphics, camX, camY);
+        renderEntities(graphics, camX, camY);
+        renderHud(graphics);
+
+        if (world.getGameState() == GameState.WIN) {
+            renderEndScreen(graphics, "YOU WIN!", true);
+        } else if (world.getGameState() == GameState.GAME_OVER) {
+            renderEndScreen(graphics, "GAME OVER", false);
+        }
+    }
+
+    private void updateCamera() {
         double targetX = player.getX() - getWidth() / 2.0;
         double targetY = player.getY() - getHeight() / 2.0;
-
         double smoothing = 0.05;
 
         cameraX += (targetX - cameraX) * smoothing;
@@ -128,72 +376,67 @@ public class GamePanel extends JPanel {
 
         int worldWidth = map.getCols() * map.getTileSize();
         int worldHeight = map.getRows() * map.getTileSize();
-
         double maxCameraX = Math.max(0, worldWidth - getWidth());
         double maxCameraY = Math.max(0, worldHeight - getHeight());
 
-        cameraX = Math.max(0, cameraX);
-        cameraY = Math.max(0, cameraY);
+        cameraX = Math.max(0, Math.min(maxCameraX, cameraX));
+        cameraY = Math.max(0, Math.min(maxCameraY, cameraY));
+    }
 
-        cameraX = Math.min(maxCameraX, cameraX);
-        cameraY = Math.min(maxCameraY, cameraY);
-
-        int camX = (int) cameraX;
-        int camY = (int) cameraY;
-
-        // Tiles rendern
-        tileRenderer.render(g, camX, camY, getWidth(), getHeight());
-
-        // Pellets rendern
-        g.setColor(Color.YELLOW);
+    private void renderPellets(Graphics graphics, int camX, int camY) {
+        graphics.setColor(Color.YELLOW);
 
         for (Pellet pellet : world.getPellets()) {
             if (!pellet.isCollected()) {
                 int screenX = (int) pellet.getX() - camX;
                 int screenY = (int) pellet.getY() - camY;
-
-                g.fillOval(screenX, screenY, pellet.getSize(), pellet.getSize());
+                graphics.fillOval(
+                        screenX,
+                        screenY,
+                        pellet.getSize(),
+                        pellet.getSize()
+                );
             }
         }
+    }
 
-        // Entities rendern
-        for (Entity e : world.getEntities()) {
-            int screenX = (int) e.getX() - camX;
-            int screenY = (int) e.getY() - camY;
+    private void renderEntities(Graphics graphics, int camX, int camY) {
+        for (Entity entity : world.getEntities()) {
+            int screenX = (int) entity.getX() - camX;
+            int screenY = (int) entity.getY() - camY;
 
-            if (e instanceof Player) {
-                g.setColor(Color.YELLOW);
-            } else if (e instanceof Ghost ghost) {
-                g.setColor(ghost.getColor());
+            if (entity instanceof Player) {
+                graphics.setColor(Color.YELLOW);
+            } else if (entity instanceof Ghost ghost) {
+                graphics.setColor(ghost.getColor());
             } else {
-                g.setColor(Color.WHITE);
+                graphics.setColor(Color.WHITE);
             }
 
-            g.fillRect(screenX, screenY, e.getSize(), e.getSize());
+            graphics.fillRect(
+                    screenX,
+                    screenY,
+                    entity.getSize(),
+                    entity.getSize()
+            );
         }
+    }
 
-        // HUD / UI immer ganz am Schluss zeichnen
-        g.setColor(Color.BLACK);
-        g.fillRect(10, 5, 220, 45);
+    private void renderHud(Graphics graphics) {
+        graphics.setColor(Color.BLACK);
+        graphics.fillRect(10, 5, 220, 45);
 
-        g.setColor(Color.WHITE);
-        g.drawString("Score: " + world.getScore(), 20, 22);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString("Score: " + world.getScore(), 20, 22);
 
         HighscoreEntry bestHighscore = world.getBestHighscore();
         if (bestHighscore != null) {
-            g.drawString(
+            graphics.drawString(
                     "Best: " + bestHighscore.getName()
                             + " " + bestHighscore.getScore(),
                     20,
                     42
             );
         }
-
-        if (world.getGameState() == GameState.WIN) {
-            renderEndScreen(g, "YOU WIN!", true);
-        } else if (world.getGameState() == GameState.GAME_OVER) {
-            renderEndScreen(g, "GAME OVER", false);
-        }
     }
-
 }

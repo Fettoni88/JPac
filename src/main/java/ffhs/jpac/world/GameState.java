@@ -1,8 +1,10 @@
 package ffhs.jpac.world;
 
 public enum GameState {
-    START,
-    RUNNING,
+    START_MENU,
+    NAME_INPUT,
+    PLAYING,
+    HIGHSCORE,
     GAME_OVER,
     WIN
 }

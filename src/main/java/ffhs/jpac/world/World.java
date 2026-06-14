@@ -15,12 +15,12 @@ public class World {
     private final TileMap map;
     private final List<Entity> entities = new ArrayList<>();
     private final List<Pellet> pellets = new ArrayList<>();
-    private final String playerName;
     private final HighscoreManager highscoreManager;
+    private String playerName;
     private List<HighscoreEntry> highscores;
     private Player player;
     private int score = 0;
-    private GameState gameState = GameState.START;
+    private GameState gameState = GameState.START_MENU;
     private boolean highscoreSaved;
 
     public int getScore() {
@@ -81,6 +81,10 @@ public class World {
         return highscores.getFirst();
     }
 
+    public List<HighscoreEntry> getHighscores() {
+        return List.copyOf(highscores);
+    }
+
     public void addEntity(Entity entity) {
         entities.add(entity);
     }
@@ -101,13 +105,36 @@ public class World {
         return gameState;
     }
 
-    public void startGame() {
-        if (gameState == GameState.START) {
-            gameState = GameState.RUNNING;
+    public void showNameInput() {
+        if (gameState == GameState.START_MENU) {
+            gameState = GameState.NAME_INPUT;
         }
     }
 
+    public void showHighscores() {
+        highscores = highscoreManager.loadHighscores();
+        gameState = GameState.HIGHSCORE;
+    }
+
+    public void showStartMenu() {
+        gameState = GameState.START_MENU;
+    }
+
+    public void startGame() {
+        startGame(playerName);
+    }
+
+    public void startGame(String name) {
+        playerName = normalizePlayerName(name);
+        gameState = GameState.PLAYING;
+    }
+
     public void restartGame() {
+        resetGame();
+        gameState = GameState.START_MENU;
+    }
+
+    private void resetGame() {
         score = 0;
         highscoreSaved = false;
 
@@ -116,12 +143,11 @@ public class World {
         }
 
         generatePellets();
-        gameState = GameState.START;
     }
 
     public void update(double deltaTime) {
 
-        if (gameState != GameState.RUNNING) {
+        if (gameState != GameState.PLAYING) {
             return;
         }
 
@@ -132,7 +158,7 @@ public class World {
         checkPelletCollection();
         checkGhostCollision();
 
-        if (gameState == GameState.RUNNING && areAllPelletsCollected()) {
+        if (gameState == GameState.PLAYING && areAllPelletsCollected()) {
             gameState = GameState.WIN;
             saveHighscore();
         }

@@ -13,7 +13,7 @@ public class GameWindow {
     private final GameLoop loop;
     private final GamePanel panel;
 
-    public GameWindow(String playerName) {
+    public GameWindow() {
 
         frame = new JFrame("JPac Prototype");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,7 +24,7 @@ public class GameWindow {
         int worldWidth = map.getCols() * map.getTileSize();
         int worldHeight = map.getRows() * map.getTileSize();
 
-        World world = new World(worldWidth, worldHeight, map, playerName);
+        World world = new World(worldWidth, worldHeight, map);
         Player player = new Player(331, 427);
 
         Ghost redGhost = new Ghost(

@@ -47,7 +47,7 @@ class WorldTest {
 
         world.update(0.1);
 
-        assertEquals(GameState.START, world.getGameState());
+        assertEquals(GameState.START_MENU, world.getGameState());
         assertEquals(43, player.getX(), 0.0001);
     }
 
@@ -110,7 +110,7 @@ class WorldTest {
 
         world.restartGame();
 
-        assertEquals(GameState.START, world.getGameState());
+        assertEquals(GameState.START_MENU, world.getGameState());
         assertEquals(0, world.getScore());
         assertTrue(world.getPellets().size() > 1);
         assertTrue(world.getPellets().stream().noneMatch(Pellet::isCollected));
