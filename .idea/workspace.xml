@@ -4,24 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="docs: add project documentation">
+    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="feat: enhance ghost behavior and maze validation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Direction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mazes/maze1.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mazes/maze1.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mazes/maze2.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mazes/maze2.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mazes/maze3.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mazes/maze3.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mazes/maze4.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mazes/maze4.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mazes/maze5.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mazes/maze5.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/maze/MazeLoaderTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/maze/MazeLoaderTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/GhostTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/GhostTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/PlayerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,6 +15,7 @@
   <component name="CopilotPersistence">
     <persistenceIdMap>
       <entry key="_C:/Users/Fettoni/Desktop/FFHS/Modulen/JPL, Java Project Level/Semesterarbeit/JPac" value="3EDkVGtAdhkfbR3eSPXSMDOIYHS" />
+      <entry key="_C:/Users/Führer/Documents/Codex/2026-06-05/nutze-github-um-mein-projekt-fettoni88/work/JPac" value="3F8lLmQx41deuiR82yxkVobsjyH" />
     </persistenceIdMap>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -80,24 +65,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.GameApplication.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.GameApplication.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="GameApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="ffhs.jpac.GameApplication" />
@@ -140,6 +125,7 @@
       <workItem from="1780732013355" duration="83000" />
       <workItem from="1780748031301" duration="2450000" />
       <workItem from="1781450976337" duration="8967000" />
+      <workItem from="1781464527217" duration="995000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor NPC classes to Ghost classes and update related methods">
       <option name="closed" value="true" />
@@ -165,7 +151,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779724772634</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="feat: enhance ghost behavior and maze validation">
+      <option name="closed" value="true" />
+      <created>1781464568624</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1781464568624</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -175,7 +169,8 @@
     <MESSAGE value="Refactor NPC classes to Ghost classes and update related methods" />
     <MESSAGE value="Add Ghost class with state-based behavior for NPC interactions" />
     <MESSAGE value="Implement direction handling and pellet collection mechanics" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement direction handling and pellet collection mechanics" />
+    <MESSAGE value="feat: enhance ghost behavior and maze validation" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: enhance ghost behavior and maze validation" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
