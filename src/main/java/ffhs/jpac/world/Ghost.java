@@ -153,8 +153,11 @@ public class Ghost extends MovingEntity {
         }
 
         if (!leftGhostHouse) {
-            followGhostHousePath(world, deltaTime);
-            return;
+            if (world.getMap().hasGhostHouse()) {
+                followGhostHousePath(world, deltaTime);
+                return;
+            }
+            leftGhostHouse = true;
         }
 
         updateState(world);

@@ -1,5 +1,9 @@
 package ffhs.jpac.world;
 
+import ffhs.jpac.maze.MazeData;
+import ffhs.jpac.maze.MazeLoader;
+import ffhs.jpac.maze.MazePosition;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,51 +19,105 @@ public class TileMap {
     private static final int GHOST_HOUSE = 2;
 
     private final TileType[][] map;
+    private final boolean[][] pelletTiles;
+    private final List<MazePosition> pelletPositions = new ArrayList<>();
+    private final List<MazePosition> ghostSpawns = new ArrayList<>();
+    private MazePosition playerSpawn;
 
     public TileMap(String resourcePath) {
-        this.map = loadMap(resourcePath);
+        if (resourcePath.endsWith(".json")) {
+            loadMazeData(MazeLoader.load(resourcePath));
+        } else {
+            loadLegacyMap(resourcePath);
+        }
+
+        map = loadedMap;
+        pelletTiles = loadedPelletTiles;
     }
 
-    private TileType[][] loadMap(String path) {
+    public TileMap(MazeData mazeData) {
+        MazeLoader.validate(mazeData);
+        loadMazeData(mazeData);
+        map = loadedMap;
+        pelletTiles = loadedPelletTiles;
+    }
 
+    private TileType[][] loadedMap;
+    private boolean[][] loadedPelletTiles;
+
+    private void loadMazeData(MazeData mazeData) {
+        List<String> pattern = mazeData.getPattern();
+        loadedMap = new TileType[pattern.size()][pattern.getFirst().length()];
+        loadedPelletTiles =
+                new boolean[pattern.size()][pattern.getFirst().length()];
+
+        for (int row = 0; row < pattern.size(); row++) {
+            for (int col = 0; col < pattern.get(row).length(); col++) {
+                char symbol = pattern.get(row).charAt(col);
+                loadedMap[row][col] = symbol == '#'
+                        ? TileType.WALL
+                        : TileType.FLOOR;
+
+                if (symbol == '.' || symbol == 'o') {
+                    loadedPelletTiles[row][col] = true;
+                    pelletPositions.add(new MazePosition(row, col));
+                } else if (symbol == 'P') {
+                    playerSpawn = new MazePosition(row, col);
+                } else if (symbol == 'G') {
+                    ghostSpawns.add(new MazePosition(row, col));
+                }
+            }
+        }
+    }
+
+    private void loadLegacyMap(String resourcePath) {
         try {
-            InputStream is = getClass().getResourceAsStream(path);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            InputStream input = getClass().getResourceAsStream(resourcePath);
+            if (input == null) {
+                throw new IllegalArgumentException(
+                        "Map resource not found: " + resourcePath
+                );
+            }
 
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(input)
+            );
             List<TileType[]> rows = new ArrayList<>();
+
             String line;
-
-            while ((line = br.readLine()) != null) {
-
+            while ((line = reader.readLine()) != null) {
                 String[] tokens = line.trim().split("\\s+");
                 TileType[] row = new TileType[tokens.length];
 
-                for (int i = 0; i < tokens.length; i++) {
-
-                    int value = Integer.parseInt(tokens[i]);
-
-                    if (value == WALL) {
-                        row[i] = TileType.WALL;
-                    } else if (value == GHOST_HOUSE) {
-                        row[i] = TileType.GHOST_HOUSE;
-                    } else {
-                        row[i] = TileType.FLOOR;
-                    }
+                for (int col = 0; col < tokens.length; col++) {
+                    int value = Integer.parseInt(tokens[col]);
+                    row[col] = switch (value) {
+                        case WALL -> TileType.WALL;
+                        case GHOST_HOUSE -> TileType.GHOST_HOUSE;
+                        default -> TileType.FLOOR;
+                    };
                 }
 
                 rows.add(row);
             }
 
-            TileType[][] result = new TileType[rows.size()][];
+            loadedMap = rows.toArray(TileType[][]::new);
+            loadedPelletTiles =
+                    new boolean[loadedMap.length][loadedMap[0].length];
 
-            for (int i = 0; i < rows.size(); i++) {
-                result[i] = rows.get(i);
+            for (int row = 0; row < loadedMap.length; row++) {
+                for (int col = 0; col < loadedMap[row].length; col++) {
+                    if (loadedMap[row][col] == TileType.FLOOR) {
+                        loadedPelletTiles[row][col] = true;
+                        pelletPositions.add(new MazePosition(row, col));
+                    }
+                }
             }
-
-            return result;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Map konnte nicht geladen werden: " + path, e);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException(
+                    "Could not load map: " + resourcePath,
+                    exception
+            );
         }
     }
 
@@ -75,8 +133,19 @@ public class TileMap {
         return map[row][col] == TileType.GHOST_HOUSE;
     }
 
+    public boolean hasGhostHouse() {
+        for (TileType[] row : map) {
+            for (TileType tile : row) {
+                if (tile == TileType.GHOST_HOUSE) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean isPelletTile(int row, int col) {
-        return map[row][col] == TileType.FLOOR;
+        return pelletTiles[row][col];
     }
 
     public boolean isInside(int row, int col) {
@@ -93,6 +162,21 @@ public class TileMap {
 
     public int getTileSize() {
         return TILE_SIZE;
+    }
+
+    public MazePosition getPlayerSpawn() {
+        if (playerSpawn == null) {
+            throw new IllegalStateException("Map has no player spawn");
+        }
+        return playerSpawn;
+    }
+
+    public List<MazePosition> getGhostSpawns() {
+        return List.copyOf(ghostSpawns);
+    }
+
+    public List<MazePosition> getPelletPositions() {
+        return List.copyOf(pelletPositions);
     }
 
     public int[] findGhostHouseExit() {
@@ -112,8 +196,14 @@ public class TileMap {
                     int outsideCol = col + direction.getDx();
 
                     if (isInside(outsideRow, outsideCol)
-                            && getTile(outsideRow, outsideCol) == TileType.FLOOR) {
-                        return new int[]{row, col, outsideRow, outsideCol};
+                            && getTile(outsideRow, outsideCol)
+                            == TileType.FLOOR) {
+                        return new int[]{
+                                row,
+                                col,
+                                outsideRow,
+                                outsideCol
+                        };
                     }
                 }
             }

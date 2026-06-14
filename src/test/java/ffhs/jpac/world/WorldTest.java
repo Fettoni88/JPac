@@ -224,6 +224,25 @@ class WorldTest {
     }
 
     @Test
+    void jsonMazeGeneratesOnlyDefinedPellets() {
+        TileMap map = new TileMap("/mazes/maze1.json");
+        World world = new World(
+                map.getCols() * map.getTileSize(),
+                map.getRows() * map.getTileSize(),
+                map,
+                "Player",
+                createHighscoreManager()
+        );
+
+        world.generatePellets();
+
+        assertEquals(
+                map.getPelletPositions().size(),
+                world.getPellets().size()
+        );
+    }
+
+    @Test
     void playerTreatsGhostHouseAsBlockedButUnreleasedGhostDoesNot() {
         World world = createWorld();
         Player player = new Player(331, 363);

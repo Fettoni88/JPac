@@ -1,12 +1,11 @@
 package ffhs.jpac.world;
 
+import ffhs.jpac.maze.MazePosition;
 import ffhs.jpac.persistence.HighscoreEntry;
 import ffhs.jpac.persistence.HighscoreManager;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 public class World {
 
@@ -291,46 +290,11 @@ public class World {
     public void generatePellets() {
         pellets.clear();
 
-        if (player == null) {
-            return;
-        }
-
         int tileSize = map.getTileSize();
-        int startCol = (int) ((player.getX() + player.getSize() / 2.0) / tileSize);
-        int startRow = (int) ((player.getY() + player.getSize() / 2.0) / tileSize);
-        boolean[][] visited = new boolean[map.getRows()][map.getCols()];
-        Queue<int[]> openTiles = new ArrayDeque<>();
-
-        visited[startRow][startCol] = true;
-        openTiles.add(new int[]{startRow, startCol});
-
-        while (!openTiles.isEmpty()) {
-            int[] tile = openTiles.remove();
-            int row = tile[0];
-            int col = tile[1];
-
-            if (map.isPelletTile(row, col)) {
-                double x = col * tileSize + tileSize / 2.0 - 3;
-                double y = row * tileSize + tileSize / 2.0 - 3;
-                pellets.add(new Pellet(x, y));
-            }
-
-            for (Direction direction : List.of(
-                    Direction.UP,
-                    Direction.DOWN,
-                    Direction.LEFT,
-                    Direction.RIGHT
-            )) {
-                int nextRow = row + direction.getDy();
-                int nextCol = col + direction.getDx();
-
-                if (map.isInside(nextRow, nextCol)
-                        && !visited[nextRow][nextCol]
-                        && map.isPelletTile(nextRow, nextCol)) {
-                    visited[nextRow][nextCol] = true;
-                    openTiles.add(new int[]{nextRow, nextCol});
-                }
-            }
+        for (MazePosition position : map.getPelletPositions()) {
+            double x = position.col() * tileSize + tileSize / 2.0 - 3;
+            double y = position.row() * tileSize + tileSize / 2.0 - 3;
+            pellets.add(new Pellet(x, y));
         }
     }
 

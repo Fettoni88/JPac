@@ -1,11 +1,12 @@
 package ffhs.jpac.ui;
 
 import ffhs.jpac.engine.GameLoop;
+import ffhs.jpac.maze.MazePosition;
 import ffhs.jpac.world.*;
-
 
 import javax.swing.JFrame;
 import java.awt.Color;
+import java.util.List;
 
 public class GameWindow {
 
@@ -19,32 +20,43 @@ public class GameWindow {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
-        TileMap map = new TileMap("/maps/map.txt");
+        TileMap map = new TileMap("/mazes/maze1.json");
 
         int worldWidth = map.getCols() * map.getTileSize();
         int worldHeight = map.getRows() * map.getTileSize();
 
         World world = new World(worldWidth, worldHeight, map);
-        Player player = new Player(331, 427);
-
-        Ghost redGhost = new Ghost(
-                299, 267, Color.RED, GhostPersonality.RED, 0
+        Player player = new Player(
+                spawnX(map.getPlayerSpawn(), map, 10),
+                spawnY(map.getPlayerSpawn(), map, 10)
         );
-        Ghost pinkGhost = new Ghost(
-                331, 267, Color.PINK, GhostPersonality.PINK, 3
-        );
-        Ghost cyanGhost = new Ghost(
-                363, 267, Color.CYAN, GhostPersonality.CYAN, 6
-        );
-        Ghost orangeGhost = new Ghost(
-                331, 299, Color.ORANGE, GhostPersonality.ORANGE, 9
-        );
-
         world.addEntity(player);
-        world.addEntity(redGhost);
-        world.addEntity(pinkGhost);
-        world.addEntity(cyanGhost);
-        world.addEntity(orangeGhost);
+
+        Color[] colors = {
+                Color.RED,
+                Color.PINK,
+                Color.CYAN,
+                Color.ORANGE
+        };
+        GhostPersonality[] personalities = {
+                GhostPersonality.RED,
+                GhostPersonality.PINK,
+                GhostPersonality.CYAN,
+                GhostPersonality.ORANGE
+        };
+        double[] releaseDelays = {0, 3, 6, 9};
+        List<MazePosition> ghostSpawns = map.getGhostSpawns();
+
+        for (int index = 0; index < 4; index++) {
+            MazePosition spawn = ghostSpawns.get(index);
+            world.addEntity(new Ghost(
+                    spawnX(spawn, map, 10),
+                    spawnY(spawn, map, 10),
+                    colors[index],
+                    personalities[index],
+                    releaseDelays[index]
+            ));
+        }
 
         world.setPlayer(player);
         world.generatePellets();
@@ -62,5 +74,25 @@ public class GameWindow {
     public void show() {
         frame.setVisible(true);
         panel.requestFocus();
+    }
+
+    private double spawnX(
+            MazePosition position,
+            TileMap map,
+            int entitySize
+    ) {
+        return position.col() * map.getTileSize()
+                + map.getTileSize() / 2.0
+                - entitySize / 2.0;
+    }
+
+    private double spawnY(
+            MazePosition position,
+            TileMap map,
+            int entitySize
+    ) {
+        return position.row() * map.getTileSize()
+                + map.getTileSize() / 2.0
+                - entitySize / 2.0;
     }
 }

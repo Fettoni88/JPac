@@ -1,5 +1,6 @@
 package ffhs.jpac.world;
 
+import ffhs.jpac.maze.MazePosition;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
@@ -163,5 +164,35 @@ class GhostTest {
         assertTrue(red.getY() > 267);
         assertTrue(red.getY() < 331);
         assertFalse(red.hasLeftGhostHouse());
+    }
+
+    @Test
+    void jsonMazeGhostStartsNormalAiWithoutGhostHousePath() {
+        TileMap map = new TileMap("/mazes/maze1.json");
+        MazePosition playerSpawn = map.getPlayerSpawn();
+        MazePosition ghostSpawn = map.getGhostSpawns().getFirst();
+        int tileSize = map.getTileSize();
+        Player player = new Player(
+                playerSpawn.col() * tileSize + 11,
+                playerSpawn.row() * tileSize + 11
+        );
+        World world = new World(
+                map.getCols() * tileSize,
+                map.getRows() * tileSize,
+                map
+        );
+        world.setPlayer(player);
+        Ghost red = new Ghost(
+                ghostSpawn.col() * tileSize + 11,
+                ghostSpawn.row() * tileSize + 11,
+                Color.RED,
+                GhostPersonality.RED,
+                0
+        );
+
+        red.update(world, 1.0 / 60.0);
+
+        assertTrue(red.isReleased());
+        assertTrue(red.hasLeftGhostHouse());
     }
 }
