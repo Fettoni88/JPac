@@ -10,6 +10,25 @@ import java.util.List;
 
 public class World {
 
+    private static final List<Color> GHOST_COLORS = List.of(
+            Color.RED,
+            Color.PINK,
+            Color.CYAN,
+            Color.ORANGE
+    );
+    private static final List<GhostPersonality> GHOST_PERSONALITIES = List.of(
+            GhostPersonality.RED,
+            GhostPersonality.PINK,
+            GhostPersonality.BLUE,
+            GhostPersonality.ORANGE
+    );
+    private static final List<Double> GHOST_RELEASE_DELAYS = List.of(
+            0.0,
+            5.0,
+            10.0,
+            15.0
+    );
+
     private int width;
     private int height;
     private TileMap map;
@@ -21,7 +40,7 @@ public class World {
     private Player player;
     private int score = 0;
     private GameState gameState = GameState.START_MENU;
-    private boolean highscoreSaved;
+    private boolean hasSavedHighscore;
 
     public int getScore() {
         return score;
@@ -172,7 +191,7 @@ public class World {
 
     private void resetGame() {
         score = 0;
-        highscoreSaved = false;
+        hasSavedHighscore = false;
 
         for (Entity entity : entities) {
             entity.reset();
@@ -186,43 +205,36 @@ public class World {
         width = map.getCols() * map.getTileSize();
         height = map.getRows() * map.getTileSize();
         score = 0;
-        highscoreSaved = false;
+        hasSavedHighscore = false;
         entities.clear();
         pellets.clear();
 
-        player = new Player(
-                spawnX(map.getPlayerSpawn(), Player.SIZE),
-                spawnY(map.getPlayerSpawn(), Player.SIZE)
-        );
+        player = createPlayer();
         entities.add(player);
+        spawnGhosts();
+        generatePellets();
+    }
 
-        Color[] colors = {
-                Color.RED,
-                Color.PINK,
-                Color.CYAN,
-                Color.ORANGE
-        };
-        GhostPersonality[] personalities = {
-                GhostPersonality.RED,
-                GhostPersonality.PINK,
-                GhostPersonality.CYAN,
-                GhostPersonality.ORANGE
-        };
-        double[] releaseDelays = {0, 5, 10, 15};
-        List<MazePosition> ghostSpawns = map.getGhostSpawns();
+    private Player createPlayer() {
+        MazePosition spawn = map.getPlayerSpawn();
+        return new Player(
+                spawnX(spawn, Player.SIZE),
+                spawnY(spawn, Player.SIZE)
+        );
+    }
 
-        for (int index = 0; index < 4; index++) {
-            MazePosition spawn = ghostSpawns.get(index);
+    private void spawnGhosts() {
+        List<MazePosition> spawns = map.getGhostSpawns();
+        for (int index = 0; index < GHOST_COLORS.size(); index++) {
+            MazePosition spawn = spawns.get(index);
             entities.add(new Ghost(
                     spawnX(spawn, Ghost.SIZE),
                     spawnY(spawn, Ghost.SIZE),
-                    colors[index],
-                    personalities[index],
-                    releaseDelays[index]
+                    GHOST_COLORS.get(index),
+                    GHOST_PERSONALITIES.get(index),
+                    GHOST_RELEASE_DELAYS.get(index)
             ));
         }
-
-        generatePellets();
     }
 
     private double spawnX(MazePosition position, int entitySize) {
@@ -241,8 +253,8 @@ public class World {
             return;
         }
 
-        for (Entity e : entities) {
-            e.update(this, deltaTime);
+        for (Entity entity : entities) {
+            entity.update(this, deltaTime);
         }
 
         checkPelletCollection();
@@ -259,11 +271,11 @@ public class World {
         }
 
         gameState = endState;
-        saveHighscore();
+        saveHighscoreIfNeeded();
     }
 
-    private void saveHighscore() {
-        if (highscoreSaved) {
+    private void saveHighscoreIfNeeded() {
+        if (hasSavedHighscore) {
             return;
         }
 
@@ -273,7 +285,7 @@ public class World {
                 map.getMazeId(),
                 map.getMazeName()
         );
-        highscoreSaved = true;
+        hasSavedHighscore = true;
     }
 
     private String normalizePlayerName(String name) {
@@ -287,19 +299,22 @@ public class World {
         return gameState == GameState.GAME_OVER;
     }
 
-    public boolean isColliding(Entity e) {
-
+    public boolean isColliding(Entity entity) {
         int tileSize = map.getTileSize();
 
-        int leftTile   = (int) (e.getX() / tileSize);
-        int rightTile  = (int) ((e.getX() + e.getSize() - 1) / tileSize);
-        int topTile    = (int) (e.getY() / tileSize);
-        int bottomTile = (int) ((e.getY() + e.getSize() - 1) / tileSize);
+        int leftTile = (int) (entity.getX() / tileSize);
+        int rightTile = (int) (
+                (entity.getX() + entity.getSize() - 1) / tileSize
+        );
+        int topTile = (int) (entity.getY() / tileSize);
+        int bottomTile = (int) (
+                (entity.getY() + entity.getSize() - 1) / tileSize
+        );
 
-        return isBlockedFor(e, topTile, leftTile)
-                || isBlockedFor(e, topTile, rightTile)
-                || isBlockedFor(e, bottomTile, leftTile)
-                || isBlockedFor(e, bottomTile, rightTile);
+        return isBlockedFor(entity, topTile, leftTile)
+                || isBlockedFor(entity, topTile, rightTile)
+                || isBlockedFor(entity, bottomTile, leftTile)
+                || isBlockedFor(entity, bottomTile, rightTile);
     }
 
     public boolean canMove(Entity entity, Direction direction) {
@@ -337,7 +352,15 @@ public class World {
             return true;
         }
 
-        return entity instanceof Player && map.isGhostHouse(row, col);
+        if (!map.isGhostHouse(row, col)) {
+            return false;
+        }
+
+        if (entity instanceof Player) {
+            return true;
+        }
+
+        return entity instanceof Ghost ghost && ghost.isActive();
     }
 
     private void checkPelletCollection() {
@@ -360,25 +383,12 @@ public class World {
 
         for (Entity entity : entities) {
             if (entity instanceof Ghost ghost
-                    && ghost.isReleased()
-                    && isOutsideGhostHouse(ghost)
+                    && ghost.isActive()
                     && isOverlapping(player, ghost)) {
                 endGame(GameState.GAME_OVER);
                 return;
             }
         }
-    }
-
-    private boolean isOutsideGhostHouse(Ghost ghost) {
-        if (ghost.hasLeftGhostHouse() || !map.hasGhostHouse()) {
-            return true;
-        }
-
-        double centerX = ghost.getX() + ghost.getSize() / 2.0;
-        double centerY = ghost.getY() + ghost.getSize() / 2.0;
-        int col = map.getTileColFromPixel(centerX);
-        int row = map.getTileRowFromPixel(centerY);
-        return map.isInside(row, col) && !map.isGhostHouse(row, col);
     }
 
     private boolean isOverlapping(Entity a, Entity b) {

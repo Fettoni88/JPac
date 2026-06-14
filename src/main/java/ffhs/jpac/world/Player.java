@@ -30,6 +30,10 @@ public class Player extends MovingEntity {
                 : INPUT_BUFFER_DURATION;
     }
 
+    public Direction getCurrentDirection() {
+        return currentDirection;
+    }
+
     @Override
     public void reset() {
         super.reset();

@@ -147,12 +147,7 @@ public final class MazeLoader {
         while (!open.isEmpty()) {
             MazePosition current = open.remove();
 
-            for (MazePosition neighbor : List.of(
-                    new MazePosition(current.row() - 1, current.col()),
-                    new MazePosition(current.row() + 1, current.col()),
-                    new MazePosition(current.row(), current.col() - 1),
-                    new MazePosition(current.row(), current.col() + 1)
-            )) {
+            for (MazePosition neighbor : neighborsOf(current)) {
                 if (isPathTile(pattern, neighbor)
                         && visited.add(neighbor)) {
                     open.add(neighbor);
@@ -227,12 +222,7 @@ public final class MazeLoader {
 
         while (!open.isEmpty()) {
             MazePosition current = open.remove();
-            for (MazePosition neighbor : List.of(
-                    new MazePosition(current.row() - 1, current.col()),
-                    new MazePosition(current.row() + 1, current.col()),
-                    new MazePosition(current.row(), current.col() - 1),
-                    new MazePosition(current.row(), current.col() + 1)
-            )) {
+            for (MazePosition neighbor : neighborsOf(current)) {
                 if (isGhostHouseTile(pattern, neighbor)
                         && visited.add(neighbor)) {
                     open.add(neighbor);
@@ -251,10 +241,7 @@ public final class MazeLoader {
             List<String> pattern,
             MazePosition position
     ) {
-        if (position.row() < 0
-                || position.row() >= MAZE_HEIGHT
-                || position.col() < 0
-                || position.col() >= MAZE_WIDTH) {
+        if (!isInsideMaze(position)) {
             return false;
         }
 
@@ -270,16 +257,10 @@ public final class MazeLoader {
             char firstSymbol,
             char secondSymbol
     ) {
-        for (MazePosition neighbor : List.of(
-                new MazePosition(row - 1, col),
-                new MazePosition(row + 1, col),
-                new MazePosition(row, col - 1),
-                new MazePosition(row, col + 1)
+        for (MazePosition neighbor : neighborsOf(
+                new MazePosition(row, col)
         )) {
-            if (neighbor.row() < 0
-                    || neighbor.row() >= MAZE_HEIGHT
-                    || neighbor.col() < 0
-                    || neighbor.col() >= MAZE_WIDTH) {
+            if (!isInsideMaze(neighbor)) {
                 continue;
             }
 
@@ -302,12 +283,7 @@ public final class MazeLoader {
 
         while (!open.isEmpty()) {
             MazePosition current = open.remove();
-            for (MazePosition neighbor : List.of(
-                    new MazePosition(current.row() - 1, current.col()),
-                    new MazePosition(current.row() + 1, current.col()),
-                    new MazePosition(current.row(), current.col() - 1),
-                    new MazePosition(current.row(), current.col() + 1)
-            )) {
+            for (MazePosition neighbor : neighborsOf(current)) {
                 if (isPlayerPathTile(pattern, neighbor)
                         && visited.add(neighbor)) {
                     open.add(neighbor);
@@ -352,10 +328,7 @@ public final class MazeLoader {
             List<String> pattern,
             MazePosition position
     ) {
-        if (position.row() < 0
-                || position.row() >= MAZE_HEIGHT
-                || position.col() < 0
-                || position.col() >= MAZE_WIDTH) {
+        if (!isInsideMaze(position)) {
             return false;
         }
 
@@ -380,10 +353,23 @@ public final class MazeLoader {
             List<String> pattern,
             MazePosition position
     ) {
+        return isInsideMaze(position)
+                && pattern.get(position.row()).charAt(position.col()) != '#';
+    }
+
+    private static List<MazePosition> neighborsOf(MazePosition position) {
+        return List.of(
+                new MazePosition(position.row() - 1, position.col()),
+                new MazePosition(position.row() + 1, position.col()),
+                new MazePosition(position.row(), position.col() - 1),
+                new MazePosition(position.row(), position.col() + 1)
+        );
+    }
+
+    private static boolean isInsideMaze(MazePosition position) {
         return position.row() >= 0
                 && position.row() < MAZE_HEIGHT
                 && position.col() >= 0
-                && position.col() < MAZE_WIDTH
-                && pattern.get(position.row()).charAt(position.col()) != '#';
+                && position.col() < MAZE_WIDTH;
     }
 }

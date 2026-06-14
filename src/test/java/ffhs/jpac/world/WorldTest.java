@@ -288,7 +288,7 @@ class WorldTest {
     }
 
     @Test
-    void releasedGhostCanMoveInsideGhostHouse() {
+    void activeGhostCannotReenterGhostHouse() {
         World world = createWorld();
         Player player = new Player(27, 27);
         Ghost ghost = new Ghost(
@@ -305,6 +305,20 @@ class WorldTest {
         ghost.setX(243);
         ghost.setY(267);
 
+        assertFalse(world.canMove(ghost, Direction.UP, 24));
+    }
+
+    @Test
+    void waitingGhostCanMoveInsideGhostHouse() {
+        World world = createWorld();
+        Ghost ghost = new Ghost(
+                243, 243, Color.PINK, GhostPersonality.PINK, 5
+        );
+
+        assertEquals(
+                GhostReleaseState.WAITING_IN_HOUSE,
+                ghost.getReleaseState()
+        );
         assertTrue(world.canMove(ghost, Direction.UP, 24));
     }
 

@@ -195,6 +195,77 @@ public class TileMap {
                 && !isGhostHouse(row, col);
     }
 
+    public boolean isWalkableForActiveGhost(int row, int col) {
+        return isWalkableForPlayer(row, col);
+    }
+
+    public List<MazePosition> getPatrolTargets() {
+        List<MazePosition> targets = new ArrayList<>();
+        addClosestWalkableTarget(targets, 1, 1);
+        addClosestWalkableTarget(targets, 1, getCols() - 2);
+        addClosestWalkableTarget(targets, getRows() - 2, getCols() - 2);
+        addClosestWalkableTarget(targets, getRows() - 2, 1);
+        return List.copyOf(targets);
+    }
+
+    public MazePosition getFarthestPatrolTarget(
+            MazePosition ghostPosition,
+            MazePosition playerPosition
+    ) {
+        MazePosition bestTarget = ghostPosition;
+        int bestDistance = -1;
+
+        for (MazePosition target : getPatrolTargets()) {
+            if (!hasActiveGhostPath(
+                    ghostPosition.row(),
+                    ghostPosition.col(),
+                    target.row(),
+                    target.col()
+            )) {
+                continue;
+            }
+
+            int distance = Math.abs(target.row() - playerPosition.row())
+                    + Math.abs(target.col() - playerPosition.col());
+            if (distance > bestDistance) {
+                bestDistance = distance;
+                bestTarget = target;
+            }
+        }
+
+        return bestTarget;
+    }
+
+    private void addClosestWalkableTarget(
+            List<MazePosition> targets,
+            int preferredRow,
+            int preferredCol
+    ) {
+        MazePosition bestPosition = null;
+        int bestDistance = Integer.MAX_VALUE;
+
+        for (int row = 0; row < getRows(); row++) {
+            for (int col = 0; col < getCols(); col++) {
+                MazePosition position = new MazePosition(row, col);
+                if (!isWalkableForActiveGhost(row, col)
+                        || targets.contains(position)) {
+                    continue;
+                }
+
+                int distance = Math.abs(row - preferredRow)
+                        + Math.abs(col - preferredCol);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestPosition = position;
+                }
+            }
+        }
+
+        if (bestPosition != null) {
+            targets.add(bestPosition);
+        }
+    }
+
     public String getMazeId() {
         return mazeId;
     }
@@ -220,6 +291,57 @@ public class TileMap {
 
     public List<MazePosition> getGhostHouseExits() {
         return List.copyOf(ghostHouseExits);
+    }
+
+    public boolean isGhostHouseExit(int row, int col) {
+        if (!ghostHouseExits.isEmpty()) {
+            return ghostHouseExits.contains(new MazePosition(row, col));
+        }
+
+        int[] exit = findGhostHouseExit();
+        return row == exit[2] && col == exit[3];
+    }
+
+    public Direction getDirectionTowardNearestGhostHouseExit(
+            int startRow,
+            int startCol,
+            Direction currentDirection
+    ) {
+        return new GhostNavigator(this).directionToNearestHouseExit(
+                startRow,
+                startCol,
+                currentDirection
+        );
+    }
+
+    public boolean hasActiveGhostPath(
+            int startRow,
+            int startCol,
+            int targetRow,
+            int targetCol
+    ) {
+        return new GhostNavigator(this).hasActivePath(
+                startRow,
+                startCol,
+                targetRow,
+                targetCol
+        );
+    }
+
+    public Direction getDirectionTowardTarget(
+            int startRow,
+            int startCol,
+            int targetRow,
+            int targetCol,
+            Direction currentDirection
+    ) {
+        return new GhostNavigator(this).directionToTarget(
+                startRow,
+                startCol,
+                targetRow,
+                targetCol,
+                currentDirection
+        );
     }
 
     public int[] findGhostHouseExit() {

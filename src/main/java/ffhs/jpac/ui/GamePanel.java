@@ -59,10 +59,6 @@ public class GamePanel extends JPanel {
     private int selectedMazeOption;
     private int selectedEndOption;
 
-    public GamePanel(Player player, TileMap map, World world) {
-        this(world);
-    }
-
     public GamePanel(World world) {
         this(world, () -> System.exit(0));
     }
@@ -113,13 +109,18 @@ public class GamePanel extends JPanel {
 
     private void handleMenuKeyPressed(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.VK_UP) {
-            selectedMenuOption =
-                    (selectedMenuOption - 1 + MENU_OPTIONS.length)
-                            % MENU_OPTIONS.length;
+            selectedMenuOption = moveSelection(
+                    selectedMenuOption,
+                    -1,
+                    MENU_OPTIONS.length
+            );
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_DOWN) {
-            selectedMenuOption =
-                    (selectedMenuOption + 1) % MENU_OPTIONS.length;
+            selectedMenuOption = moveSelection(
+                    selectedMenuOption,
+                    1,
+                    MENU_OPTIONS.length
+            );
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             activateMenuOption(selectedMenuOption);
@@ -163,13 +164,18 @@ public class GamePanel extends JPanel {
             world.showStartMenu();
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_UP) {
-            selectedMazeOption =
-                    (selectedMazeOption - 1 + MAZE_OPTIONS.length)
-                            % MAZE_OPTIONS.length;
+            selectedMazeOption = moveSelection(
+                    selectedMazeOption,
+                    -1,
+                    MAZE_OPTIONS.length
+            );
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_DOWN) {
-            selectedMazeOption =
-                    (selectedMazeOption + 1) % MAZE_OPTIONS.length;
+            selectedMazeOption = moveSelection(
+                    selectedMazeOption,
+                    1,
+                    MAZE_OPTIONS.length
+            );
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             activateMazeOption(selectedMazeOption);
@@ -202,13 +208,18 @@ public class GamePanel extends JPanel {
 
     private void handleEndScreenKeyPressed(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.VK_UP) {
-            selectedEndOption =
-                    (selectedEndOption - 1 + END_OPTIONS.length)
-                            % END_OPTIONS.length;
+            selectedEndOption = moveSelection(
+                    selectedEndOption,
+                    -1,
+                    END_OPTIONS.length
+            );
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_DOWN) {
-            selectedEndOption =
-                    (selectedEndOption + 1) % END_OPTIONS.length;
+            selectedEndOption = moveSelection(
+                    selectedEndOption,
+                    1,
+                    END_OPTIONS.length
+            );
             repaint();
         } else if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             activateEndOption(selectedEndOption);
@@ -288,6 +299,10 @@ public class GamePanel extends JPanel {
         return new Rectangle(getWidth() / 2 - 120, y - 32, 240, 40);
     }
 
+    private int moveSelection(int current, int change, int optionCount) {
+        return (current + change + optionCount) % optionCount;
+    }
+
     private void activateMenuOption(int optionIndex) {
         switch (optionIndex) {
             case 0 -> {
@@ -332,22 +347,15 @@ public class GamePanel extends JPanel {
         graphics.setFont(graphics.getFont().deriveFont(52f));
         drawCentered(graphics, "JPac", 155);
 
-        for (int index = 0; index < MENU_OPTIONS.length; index++) {
-            boolean selected = index == selectedMenuOption;
-            graphics.setColor(selected ? Color.YELLOW : Color.WHITE);
-            graphics.setFont(graphics.getFont().deriveFont(
-                    selected ? 32f : 26f
-            ));
-
-            String option = selected
-                    ? "> " + MENU_OPTIONS[index] + " <"
-                    : MENU_OPTIONS[index];
-            drawCentered(
-                    graphics,
-                    option,
-                    MENU_START_Y + index * MENU_SPACING
-            );
-        }
+        renderMenuOptions(
+                graphics,
+                MENU_OPTIONS,
+                selectedMenuOption,
+                MENU_START_Y,
+                MENU_SPACING,
+                32f,
+                26f
+        );
 
         graphics.setColor(Color.LIGHT_GRAY);
         graphics.setFont(graphics.getFont().deriveFont(16f));
@@ -381,22 +389,15 @@ public class GamePanel extends JPanel {
         graphics.setFont(graphics.getFont().deriveFont(42f));
         drawCentered(graphics, "Waehle ein Maze", 110);
 
-        for (int index = 0; index < MAZE_OPTIONS.length; index++) {
-            boolean selected = index == selectedMazeOption;
-            graphics.setColor(selected ? Color.YELLOW : Color.WHITE);
-            graphics.setFont(graphics.getFont().deriveFont(
-                    selected ? 30f : 25f
-            ));
-
-            String option = selected
-                    ? "> " + MAZE_OPTIONS[index] + " <"
-                    : MAZE_OPTIONS[index];
-            drawCentered(
-                    graphics,
-                    option,
-                    MAZE_START_Y + index * MAZE_SPACING
-            );
-        }
+        renderMenuOptions(
+                graphics,
+                MAZE_OPTIONS,
+                selectedMazeOption,
+                MAZE_START_Y,
+                MAZE_SPACING,
+                30f,
+                25f
+        );
 
         graphics.setColor(Color.LIGHT_GRAY);
         graphics.setFont(graphics.getFont().deriveFont(16f));
@@ -419,13 +420,7 @@ public class GamePanel extends JPanel {
             graphics.setColor(Color.WHITE);
             drawCentered(graphics, "Noch keine Highscores", 260);
         } else {
-            for (int index = 0; index < highscores.size(); index++) {
-                HighscoreEntry entry = highscores.get(index);
-                graphics.setColor(index == 0 ? Color.YELLOW : Color.WHITE);
-                String line = (index + 1) + ". "
-                        + formatHighscore(entry);
-                drawCentered(graphics, line, 155 + index * 34);
-            }
+            renderHighscoreEntries(graphics, highscores, 155, 34, 22f);
         }
 
         graphics.setColor(Color.LIGHT_GRAY);
@@ -463,33 +458,46 @@ public class GamePanel extends JPanel {
         graphics.setFont(graphics.getFont().deriveFont(20f));
         drawCentered(graphics, "Top 10 Highscores", 180);
 
-        graphics.setFont(graphics.getFont().deriveFont(15f));
         List<HighscoreEntry> highscores = world.getHighscores();
-        for (int index = 0; index < highscores.size(); index++) {
-            HighscoreEntry entry = highscores.get(index);
-            graphics.setColor(index == 0 ? Color.YELLOW : Color.WHITE);
-            String line = (index + 1) + ". "
-                    + formatHighscore(entry);
-            drawCentered(graphics, line, 205 + index * 24);
-        }
+        renderHighscoreEntries(graphics, highscores, 205, 24, 15f);
 
         renderEndMenu(graphics);
     }
 
     private void renderEndMenu(Graphics graphics) {
-        for (int index = 0; index < END_OPTIONS.length; index++) {
-            boolean selected = index == selectedEndOption;
+        renderMenuOptions(
+                graphics,
+                END_OPTIONS,
+                selectedEndOption,
+                END_MENU_START_Y,
+                END_MENU_SPACING,
+                23f,
+                19f
+        );
+    }
+
+    private void renderMenuOptions(
+            Graphics graphics,
+            String[] options,
+            int selectedIndex,
+            int startY,
+            int spacing,
+            float selectedFontSize,
+            float normalFontSize
+    ) {
+        for (int index = 0; index < options.length; index++) {
+            boolean selected = index == selectedIndex;
             graphics.setColor(selected ? Color.YELLOW : Color.WHITE);
             graphics.setFont(graphics.getFont().deriveFont(
-                    selected ? 23f : 19f
+                    selected ? selectedFontSize : normalFontSize
             ));
             String option = selected
-                    ? "> " + END_OPTIONS[index] + " <"
-                    : END_OPTIONS[index];
+                    ? "> " + options[index] + " <"
+                    : options[index];
             drawCentered(
                     graphics,
                     option,
-                    END_MENU_START_Y + index * END_MENU_SPACING
+                    startY + index * spacing
             );
         }
     }
@@ -616,6 +624,22 @@ public class GamePanel extends JPanel {
     private String formatHighscore(HighscoreEntry entry) {
         return entry.getName() + " - " + entry.getScore()
                 + " (" + entry.getMazeName() + ")";
+    }
+
+    private void renderHighscoreEntries(
+            Graphics graphics,
+            List<HighscoreEntry> highscores,
+            int startY,
+            int spacing,
+            float fontSize
+    ) {
+        graphics.setFont(graphics.getFont().deriveFont(fontSize));
+        for (int index = 0; index < highscores.size(); index++) {
+            graphics.setColor(index == 0 ? Color.YELLOW : Color.WHITE);
+            String line = (index + 1) + ". "
+                    + formatHighscore(highscores.get(index));
+            drawCentered(graphics, line, startY + index * spacing);
+        }
     }
 
     private boolean isEndScreen() {

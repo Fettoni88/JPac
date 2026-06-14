@@ -1,5 +1,7 @@
 package ffhs.jpac.world;
 
+import ffhs.jpac.maze.MazePosition;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,18 +13,18 @@ public class Ghost extends MovingEntity {
     public static final int SIZE = 18;
     private static final double SPEED = 100.0;
     private static final double ATTACK_RANGE = 20;
-    private static final double ORANGE_CHASE_RANGE = 150;
 
     private final Color color;
     private final GhostPersonality personality;
-    private final double releaseDelay;
+    private final GhostTargetStrategy targetStrategy;
+    private final double releaseDelaySeconds;
     private final Random random = new Random();
     private GhostState currentState = new IdleState();
-    private double releaseTimer = 0;
+    private double releaseElapsedSeconds;
     private int lastDecisionRow = -1;
     private int lastDecisionCol = -1;
-    private boolean leftGhostHouse = false;
-    private int releasePathStep = 0;
+    private GhostReleaseState releaseState =
+            GhostReleaseState.WAITING_IN_HOUSE;
 
     public Ghost(double x, double y, Color color) {
         this(x, y, color, GhostPersonality.RED, 0);
@@ -33,12 +35,13 @@ public class Ghost extends MovingEntity {
             double y,
             Color color,
             GhostPersonality personality,
-            double releaseDelay
+            double releaseDelaySeconds
     ) {
         super(x, y, SIZE, SPEED);
         this.color = color;
         this.personality = personality;
-        this.releaseDelay = releaseDelay;
+        this.targetStrategy = createTargetStrategy(personality);
+        this.releaseDelaySeconds = releaseDelaySeconds;
     }
 
     public Color getColor() {
@@ -50,26 +53,34 @@ public class Ghost extends MovingEntity {
     }
 
     public double getReleaseDelay() {
-        return releaseDelay;
+        return releaseDelaySeconds;
     }
 
     public boolean isReleased() {
-        return releaseTimer >= releaseDelay;
+        return releaseElapsedSeconds >= releaseDelaySeconds;
     }
 
     public boolean hasLeftGhostHouse() {
-        return leftGhostHouse;
+        return releaseState == GhostReleaseState.ACTIVE;
+    }
+
+    public boolean isActive() {
+        return releaseState == GhostReleaseState.ACTIVE;
+    }
+
+    public GhostReleaseState getReleaseState() {
+        return releaseState;
     }
 
     @Override
     public void reset() {
         super.reset();
         currentState = new IdleState();
-        releaseTimer = 0;
+        releaseElapsedSeconds = 0;
         lastDecisionRow = -1;
         lastDecisionCol = -1;
-        leftGhostHouse = false;
-        releasePathStep = 0;
+        releaseState = GhostReleaseState.WAITING_IN_HOUSE;
+        targetStrategy.reset();
     }
 
     public void stopMoving() {
@@ -119,52 +130,81 @@ public class Ghost extends MovingEntity {
             return;
         }
 
-        double diffX = player.getX() - x;
-        double diffY = player.getY() - y;
-        List<Direction> preferredDirections = new ArrayList<>();
+        TileMap map = world.getMap();
+        int row = map.getTileRowFromPixel(y + size / 2.0);
+        int col = map.getTileColFromPixel(x + size / 2.0);
+        MazePosition target = getChaseTarget(world);
+        Direction direction = map.getDirectionTowardTarget(
+                row,
+                col,
+                target.row(),
+                target.col(),
+                getDirection()
+        );
 
-        if (personality == GhostPersonality.PINK) {
-            addVerticalDirection(preferredDirections, diffY);
-            addHorizontalDirection(preferredDirections, diffX);
-        } else if (Math.abs(diffX) >= Math.abs(diffY)) {
-            addHorizontalDirection(preferredDirections, diffX);
-            addVerticalDirection(preferredDirections, diffY);
-        } else {
-            addVerticalDirection(preferredDirections, diffY);
-            addHorizontalDirection(preferredDirections, diffX);
-        }
-
-        addFallbackDirections(preferredDirections);
-
-        for (Direction direction : preferredDirections) {
-            if (canReachNextTile(world, direction)) {
-                setDirection(direction);
-                rememberDecisionTile(world);
-                return;
-            }
-        }
-
-        stopMoving();
-    }
-
-    @Override
-    public void update(World world, double deltaTime) {
-        if (!isReleased()) {
-            releaseTimer += deltaTime;
+        if (direction == Direction.NONE) {
             stopMoving();
             return;
         }
 
-        if (!leftGhostHouse) {
-            if (world.getMap().hasGhostHouse()) {
-                followGhostHousePath(world, deltaTime);
+        snapToTileCenter(world);
+        setDirection(direction);
+        rememberDecisionTile(world);
+    }
+
+    MazePosition getChaseTarget(World world) {
+        return targetStrategy.getTarget(this, world);
+    }
+
+    MazePosition getPlayerTile(World world) {
+        TileMap map = world.getMap();
+        Player player = world.getPlayer();
+        int playerRow = map.getTileRowFromPixel(
+                player.getY() + player.getSize() / 2.0
+        );
+        int playerCol = map.getTileColFromPixel(
+                player.getX() + player.getSize() / 2.0
+        );
+        return new MazePosition(playerRow, playerCol);
+    }
+
+    MazePosition getCurrentTile(World world) {
+        TileMap map = world.getMap();
+        return new MazePosition(
+                map.getTileRowFromPixel(y + size / 2.0),
+                map.getTileColFromPixel(x + size / 2.0)
+        );
+    }
+
+    @Override
+    public void update(World world, double deltaTime) {
+        if (releaseState == GhostReleaseState.WAITING_IN_HOUSE) {
+            releaseElapsedSeconds += deltaTime;
+            if (!isReleased()) {
+                stopMoving();
                 return;
             }
-            leftGhostHouse = true;
+
+            releaseState = isInsideGhostHouse(world)
+                    ? GhostReleaseState.LEAVING_HOUSE
+                    : GhostReleaseState.ACTIVE;
         }
 
+        if (releaseState == GhostReleaseState.LEAVING_HOUSE) {
+            leaveGhostHouse(world, deltaTime);
+            return;
+        }
+
+        targetStrategy.update(deltaTime);
         updateState(world);
         currentState.update(this, world, deltaTime);
+    }
+
+    private boolean isInsideGhostHouse(World world) {
+        int row = world.getMap().getTileRowFromPixel(y + size / 2.0);
+        int col = world.getMap().getTileColFromPixel(x + size / 2.0);
+        return world.getMap().isInside(row, col)
+                && world.getMap().isGhostHouse(row, col);
     }
 
     private void updateState(World world) {
@@ -174,24 +214,22 @@ public class Ghost extends MovingEntity {
             return;
         }
 
-        double diffX = player.getX() - x;
-        double diffY = player.getY() - y;
-        double distance = Math.sqrt(diffX * diffX + diffY * diffY);
-
+        double distance = Math.hypot(player.getX() - x, player.getY() - y);
         if (distance < ATTACK_RANGE) {
             currentState = new AttackState();
-        } else if (shouldChase(distance)) {
-            currentState = new ChaseState();
         } else {
-            currentState = new IdleState();
+            currentState = new ChaseState();
         }
     }
 
-    private boolean shouldChase(double distance) {
+    private GhostTargetStrategy createTargetStrategy(
+            GhostPersonality personality
+    ) {
         return switch (personality) {
-            case RED, PINK -> true;
-            case CYAN -> false;
-            case ORANGE -> distance < ORANGE_CHASE_RANGE;
+            case RED -> new RedTargetStrategy();
+            case PINK -> new PinkTargetStrategy();
+            case BLUE -> new BlueTargetStrategy();
+            case ORANGE -> new OrangeTargetStrategy();
         };
     }
 
@@ -222,31 +260,6 @@ public class Ghost extends MovingEntity {
         }
 
         return directions;
-    }
-
-    private void addHorizontalDirection(List<Direction> directions, double diffX) {
-        if (diffX != 0) {
-            directions.add(diffX > 0 ? Direction.RIGHT : Direction.LEFT);
-        }
-    }
-
-    private void addVerticalDirection(List<Direction> directions, double diffY) {
-        if (diffY != 0) {
-            directions.add(diffY > 0 ? Direction.DOWN : Direction.UP);
-        }
-    }
-
-    private void addFallbackDirections(List<Direction> directions) {
-        for (Direction direction : List.of(
-                Direction.UP,
-                Direction.DOWN,
-                Direction.LEFT,
-                Direction.RIGHT
-        )) {
-            if (!directions.contains(direction)) {
-                directions.add(direction);
-            }
-        }
     }
 
     Direction getDirection() {
@@ -291,52 +304,35 @@ public class Ghost extends MovingEntity {
         lastDecisionCol = (int) ((x + size / 2.0) / tileSize);
     }
 
-    private void followGhostHousePath(World world, double deltaTime) {
-        int[] center = world.getMap().findGhostHouseCenter();
-        int[] exit = world.getMap().findGhostHouseExit(
-                x + size / 2.0,
-                y + size / 2.0
-        );
-        int[][] path = {
-                {center[0], center[1]},
-                {exit[0], exit[1]},
-                {exit[2], exit[3]}
-        };
+    private void leaveGhostHouse(World world, double deltaTime) {
+        int row = world.getMap().getTileRowFromPixel(y + size / 2.0);
+        int col = world.getMap().getTileColFromPixel(x + size / 2.0);
 
-        while (releasePathStep < path.length) {
-            if (!moveTowardTile(world, path[releasePathStep], deltaTime)) {
+        if (world.getMap().isGhostHouseExit(row, col)
+                && isCenteredOnTile(world, 2)) {
+            snapToTileCenter(world);
+            releaseState = GhostReleaseState.ACTIVE;
+            stopMoving();
+            return;
+        }
+
+        if (canChooseDirection(world)) {
+            Direction exitDirection =
+                    world.getMap().getDirectionTowardNearestGhostHouseExit(
+                            row,
+                            col,
+                            getDirection()
+                    );
+            if (exitDirection == Direction.NONE) {
+                stopMoving();
                 return;
             }
 
-            releasePathStep++;
+            snapToTileCenter(world);
+            setDirection(exitDirection);
+            rememberDecisionTile(world);
         }
 
-        leftGhostHouse = true;
-        stopMoving();
-    }
-
-    private boolean moveTowardTile(World world, int[] tile, double deltaTime) {
-        int tileSize = world.getMap().getTileSize();
-        double targetX = tile[1] * tileSize + tileSize / 2.0 - size / 2.0;
-        double targetY = tile[0] * tileSize + tileSize / 2.0 - size / 2.0;
-        double step = speed * deltaTime;
-
-        if (Math.abs(x - targetX) > step) {
-            setDirection(x < targetX ? Direction.RIGHT : Direction.LEFT);
-            move(world, deltaTime);
-            return false;
-        }
-
-        x = targetX;
-
-        if (Math.abs(y - targetY) > step) {
-            setDirection(y < targetY ? Direction.DOWN : Direction.UP);
-            move(world, deltaTime);
-            return false;
-        }
-
-        y = targetY;
-        stopMoving();
-        return true;
+        move(world, deltaTime);
     }
 }

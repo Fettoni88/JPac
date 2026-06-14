@@ -11,7 +11,6 @@ public class Pellet extends Entity {
 
     @Override
     public void update(World world, double deltaTime) {
-        // Pellets bewegen sich nicht
     }
 
     public boolean isCollected() {
