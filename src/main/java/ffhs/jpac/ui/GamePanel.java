@@ -37,25 +37,39 @@ public class GamePanel extends JPanel {
             "Maze 4",
             "Maze 5"
     };
+    private static final String[] END_OPTIONS = {
+            "Restart",
+            "Main Menu",
+            "Exit"
+    };
     private static final Dimension MENU_SIZE = new Dimension(800, 600);
     private static final int MENU_START_Y = 280;
     private static final int MENU_SPACING = 60;
     private static final int MAZE_START_Y = 190;
     private static final int MAZE_SPACING = 62;
+    private static final int END_MENU_START_Y = 600;
+    private static final int END_MENU_SPACING = 46;
     private static final int MAX_NAME_LENGTH = 20;
     private static final int HUD_HEIGHT = 40;
 
     private final World world;
+    private final Runnable exitAction;
     private final StringBuilder nameInput = new StringBuilder();
     private int selectedMenuOption;
     private int selectedMazeOption;
+    private int selectedEndOption;
 
     public GamePanel(Player player, TileMap map, World world) {
         this(world);
     }
 
     public GamePanel(World world) {
+        this(world, () -> System.exit(0));
+    }
+
+    GamePanel(World world, Runnable exitAction) {
         this.world = world;
+        this.exitAction = exitAction;
         setPreferredSize(MENU_SIZE);
         setBackground(Color.BLACK);
         setFocusable(true);
@@ -187,10 +201,17 @@ public class GamePanel extends JPanel {
     }
 
     private void handleEndScreenKeyPressed(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.VK_R) {
-            world.restartGame();
-            selectedMenuOption = 0;
-            setMenuSize();
+        if (event.getKeyCode() == KeyEvent.VK_UP) {
+            selectedEndOption =
+                    (selectedEndOption - 1 + END_OPTIONS.length)
+                            % END_OPTIONS.length;
+            repaint();
+        } else if (event.getKeyCode() == KeyEvent.VK_DOWN) {
+            selectedEndOption =
+                    (selectedEndOption + 1) % END_OPTIONS.length;
+            repaint();
+        } else if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+            activateEndOption(selectedEndOption);
         }
     }
 
@@ -207,6 +228,14 @@ public class GamePanel extends JPanel {
             for (int index = 0; index < MAZE_OPTIONS.length; index++) {
                 if (getMazeOptionBounds(index).contains(event.getPoint())) {
                     selectedMazeOption = index;
+                    repaint();
+                    return;
+                }
+            }
+        } else if (isEndScreen()) {
+            for (int index = 0; index < END_OPTIONS.length; index++) {
+                if (getEndOptionBounds(index).contains(event.getPoint())) {
+                    selectedEndOption = index;
                     repaint();
                     return;
                 }
@@ -233,6 +262,14 @@ public class GamePanel extends JPanel {
                     return;
                 }
             }
+        } else if (isEndScreen()) {
+            for (int index = 0; index < END_OPTIONS.length; index++) {
+                if (getEndOptionBounds(index).contains(event.getPoint())) {
+                    selectedEndOption = index;
+                    activateEndOption(index);
+                    return;
+                }
+            }
         }
     }
 
@@ -246,6 +283,11 @@ public class GamePanel extends JPanel {
         return new Rectangle(getWidth() / 2 - 140, y - 38, 280, 50);
     }
 
+    private Rectangle getEndOptionBounds(int index) {
+        int y = END_MENU_START_Y + index * END_MENU_SPACING;
+        return new Rectangle(getWidth() / 2 - 120, y - 32, 240, 40);
+    }
+
     private void activateMenuOption(int optionIndex) {
         switch (optionIndex) {
             case 0 -> {
@@ -253,7 +295,7 @@ public class GamePanel extends JPanel {
                 world.showNameInput();
             }
             case 1 -> world.showHighscores();
-            case 2 -> System.exit(0);
+            case 2 -> exitAction.run();
             default -> {
                 // The selected index always belongs to a menu option.
             }
@@ -263,6 +305,26 @@ public class GamePanel extends JPanel {
     private void activateMazeOption(int optionIndex) {
         world.startMaze("maze" + (optionIndex + 1));
         setGameplaySize();
+    }
+
+    private void activateEndOption(int optionIndex) {
+        switch (optionIndex) {
+            case 0 -> {
+                world.restartGame();
+                selectedEndOption = 0;
+                setGameplaySize();
+            }
+            case 1 -> {
+                world.returnToMainMenu();
+                selectedMenuOption = 0;
+                selectedEndOption = 0;
+                setMenuSize();
+            }
+            case 2 -> exitAction.run();
+            default -> {
+                // The selected index always belongs to an end option.
+            }
+        }
     }
 
     private void renderMainMenu(Graphics graphics) {
@@ -399,21 +461,37 @@ public class GamePanel extends JPanel {
 
         graphics.setColor(Color.YELLOW);
         graphics.setFont(graphics.getFont().deriveFont(20f));
-        drawCentered(graphics, "Top Highscores", 195);
+        drawCentered(graphics, "Top 10 Highscores", 180);
 
-        graphics.setFont(graphics.getFont().deriveFont(17f));
+        graphics.setFont(graphics.getFont().deriveFont(15f));
         List<HighscoreEntry> highscores = world.getHighscores();
         for (int index = 0; index < highscores.size(); index++) {
             HighscoreEntry entry = highscores.get(index);
             graphics.setColor(index == 0 ? Color.YELLOW : Color.WHITE);
             String line = (index + 1) + ". "
                     + formatHighscore(entry);
-            drawCentered(graphics, line, 225 + index * 25);
+            drawCentered(graphics, line, 205 + index * 24);
         }
 
-        graphics.setColor(Color.LIGHT_GRAY);
-        graphics.setFont(graphics.getFont().deriveFont(18f));
-        drawCentered(graphics, "Press R for Main Menu", 535);
+        renderEndMenu(graphics);
+    }
+
+    private void renderEndMenu(Graphics graphics) {
+        for (int index = 0; index < END_OPTIONS.length; index++) {
+            boolean selected = index == selectedEndOption;
+            graphics.setColor(selected ? Color.YELLOW : Color.WHITE);
+            graphics.setFont(graphics.getFont().deriveFont(
+                    selected ? 23f : 19f
+            ));
+            String option = selected
+                    ? "> " + END_OPTIONS[index] + " <"
+                    : END_OPTIONS[index];
+            drawCentered(
+                    graphics,
+                    option,
+                    END_MENU_START_Y + index * END_MENU_SPACING
+            );
+        }
     }
 
     private void drawCentered(Graphics graphics, String text, int y) {
@@ -538,6 +616,11 @@ public class GamePanel extends JPanel {
     private String formatHighscore(HighscoreEntry entry) {
         return entry.getName() + " - " + entry.getScore()
                 + " (" + entry.getMazeName() + ")";
+    }
+
+    private boolean isEndScreen() {
+        return world.getGameState() == GameState.WIN
+                || world.getGameState() == GameState.GAME_OVER;
     }
 
     private void setMenuSize() {

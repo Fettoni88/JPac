@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -160,18 +161,55 @@ class GamePanelTest {
     }
 
     @Test
-    void rKeyReturnsFinishedGameToMainMenu() {
+    void endScreenRestartReloadsMazeAndKeepsHighscores() {
         TestGame testGame = createTestGame(43, 43);
-        Ghost ghost = new Ghost(43, 43, Color.RED);
-        testGame.world().addEntity(ghost);
-        testGame.world().addPellet(new Pellet(75, 43));
-        testGame.world().startGame("Player");
-        testGame.world().update(0.0);
+        openMazeOne(testGame.panel());
+        endGameWithGhostCollision(testGame.world());
+        int highscoreCount = testGame.world().getHighscores().size();
 
-        pressKey(testGame.panel(), KeyEvent.VK_R, 'R');
+        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
+
+        assertEquals(GameState.PLAYING, testGame.world().getGameState());
+        assertEquals("maze1", testGame.world().getMap().getMazeId());
+        assertEquals(0, testGame.world().getScore());
+        assertEquals(highscoreCount, testGame.world().getHighscores().size());
+    }
+
+    @Test
+    void endScreenMainMenuResetsSessionAndKeepsHighscores() {
+        TestGame testGame = createTestGame(43, 43);
+        openMazeOne(testGame.panel());
+        endGameWithGhostCollision(testGame.world());
+        int highscoreCount = testGame.world().getHighscores().size();
+
+        pressKey(
+                testGame.panel(),
+                KeyEvent.VK_DOWN,
+                KeyEvent.CHAR_UNDEFINED
+        );
+        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
 
         assertEquals(GameState.START_MENU, testGame.world().getGameState());
         assertEquals(0, testGame.world().getScore());
+        assertEquals(highscoreCount, testGame.world().getHighscores().size());
+        assertEquals(
+                new Dimension(800, 600),
+                testGame.panel().getPreferredSize()
+        );
+    }
+
+    @Test
+    void endScreenExitRunsExitActionWithMouse() {
+        AtomicBoolean exited = new AtomicBoolean();
+        TestGame testGame = createTestGame(43, 43, () -> exited.set(true));
+        openMazeOne(testGame.panel());
+        endGameWithGhostCollision(testGame.world());
+        testGame.panel().setSize(testGame.panel().getPreferredSize());
+
+        moveMouse(testGame.panel(), 288, 692);
+        clickMouse(testGame.panel(), 288, 692);
+
+        assertTrue(exited.get());
     }
 
     @Test
@@ -211,6 +249,16 @@ class GamePanelTest {
     }
 
     private TestGame createTestGame(double playerX, double playerY) {
+        return createTestGame(playerX, playerY, () -> {
+            // Tests do not close the JVM.
+        });
+    }
+
+    private TestGame createTestGame(
+            double playerX,
+            double playerY,
+            Runnable exitAction
+    ) {
         try {
             TileMap map = new TileMap("/maps/map.txt");
             Path highscoreFile = Files.createTempFile(
@@ -229,12 +277,24 @@ class GamePanelTest {
             world.setPlayer(player);
             world.addEntity(player);
 
-            GamePanel panel = new GamePanel(player, map, world);
+            GamePanel panel = new GamePanel(world, exitAction);
             panel.setSize(800, 600);
             return new TestGame(panel, world, player);
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
+    }
+
+    private void endGameWithGhostCollision(World world) {
+        Ghost ghost = world.getEntities().stream()
+                .filter(Ghost.class::isInstance)
+                .map(Ghost.class::cast)
+                .findFirst()
+                .orElseThrow();
+        ghost.setX(world.getPlayer().getX());
+        ghost.setY(world.getPlayer().getY());
+        world.update(0);
+        assertEquals(GameState.GAME_OVER, world.getGameState());
     }
 
     private void pressKey(GamePanel panel, int keyCode, char keyChar) {

@@ -151,8 +151,23 @@ public class World {
     }
 
     public void restartGame() {
-        resetGame();
+        resetCurrentSession();
+        gameState = GameState.PLAYING;
+    }
+
+    public void returnToMainMenu() {
+        resetCurrentSession();
         gameState = GameState.START_MENU;
+    }
+
+    private void resetCurrentSession() {
+        String mazeId = map.getMazeId();
+        if (mazeId != null && mazeId.startsWith("maze")) {
+            initializeMaze(new TileMap("/mazes/" + mazeId + ".json"));
+            return;
+        }
+
+        resetGame();
     }
 
     private void resetGame() {

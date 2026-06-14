@@ -92,7 +92,7 @@ class WorldTest {
     }
 
     @Test
-    void restartResetsGameAndEntityPositions() {
+    void restartResetsGameAndContinuesPlaying() {
         World world = createWorld();
         Player player = new Player(43, 43);
         Ghost ghost = new Ghost(75, 43, Color.CYAN);
@@ -110,7 +110,7 @@ class WorldTest {
 
         world.restartGame();
 
-        assertEquals(GameState.START_MENU, world.getGameState());
+        assertEquals(GameState.PLAYING, world.getGameState());
         assertEquals(0, world.getScore());
         assertTrue(world.getPellets().size() > 1);
         assertTrue(world.getPellets().stream().noneMatch(Pellet::isCollected));
@@ -345,5 +345,44 @@ class WorldTest {
         HighscoreEntry entry = manager.loadHighscores().getFirst();
         assertEquals("maze5", entry.getMazeId());
         assertEquals("Maze 5", entry.getMazeName());
+    }
+
+    @Test
+    void selectedMazeRestartReloadsSameMazeAndKeepsPlayerName() {
+        World world = createWorld();
+        world.showNameInput();
+        world.confirmPlayerName("Necib");
+        world.startMaze("maze3");
+        Player oldPlayer = world.getPlayer();
+        oldPlayer.setX(100);
+
+        world.restartGame();
+
+        assertEquals(GameState.PLAYING, world.getGameState());
+        assertEquals("maze3", world.getMap().getMazeId());
+        assertEquals("Necib", world.getPlayerName());
+        assertFalse(oldPlayer == world.getPlayer());
+        assertEquals(0, world.getScore());
+        assertEquals(
+                world.getMap().getPelletPositions().size(),
+                world.getPellets().size()
+        );
+    }
+
+    @Test
+    void returnToMainMenuResetsSelectedMazeSession() {
+        World world = createWorld();
+        world.showNameInput();
+        world.confirmPlayerName("Felipe");
+        world.startMaze("maze2");
+        Player oldPlayer = world.getPlayer();
+
+        world.returnToMainMenu();
+
+        assertEquals(GameState.START_MENU, world.getGameState());
+        assertEquals("maze2", world.getMap().getMazeId());
+        assertEquals("Felipe", world.getPlayerName());
+        assertFalse(oldPlayer == world.getPlayer());
+        assertEquals(0, world.getScore());
     }
 }

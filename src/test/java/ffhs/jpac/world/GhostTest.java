@@ -167,38 +167,47 @@ class GhostTest {
     }
 
     @Test
-    void jsonMazeGhostLeavesThroughGhostHouseExit() {
-        TileMap map = new TileMap("/mazes/maze1.json");
-        MazePosition playerSpawn = map.getPlayerSpawn();
-        MazePosition ghostSpawn = map.getGhostSpawns().getFirst();
-        int tileSize = map.getTileSize();
-        Player player = new Player(
-                playerSpawn.col() * tileSize
-                        + (tileSize - Player.SIZE) / 2.0,
-                playerSpawn.row() * tileSize
-                        + (tileSize - Player.SIZE) / 2.0
-        );
-        World world = new World(
-                map.getCols() * tileSize,
-                map.getRows() * tileSize,
-                map
-        );
-        world.setPlayer(player);
-        Ghost red = new Ghost(
-                ghostSpawn.col() * tileSize
-                        + (tileSize - Ghost.SIZE) / 2.0,
-                ghostSpawn.row() * tileSize
-                        + (tileSize - Ghost.SIZE) / 2.0,
-                Color.RED,
-                GhostPersonality.RED,
-                0
-        );
+    void ghostsLeaveTheHouseInAllJsonMazes() {
+        for (int mazeNumber = 1; mazeNumber <= 5; mazeNumber++) {
+            TileMap map = new TileMap(
+                    "/mazes/maze" + mazeNumber + ".json"
+            );
+            MazePosition playerSpawn = map.getPlayerSpawn();
+            MazePosition ghostSpawn = map.getGhostSpawns().getFirst();
+            int tileSize = map.getTileSize();
+            Player player = new Player(
+                    playerSpawn.col() * tileSize
+                            + (tileSize - Player.SIZE) / 2.0,
+                    playerSpawn.row() * tileSize
+                            + (tileSize - Player.SIZE) / 2.0
+            );
+            World world = new World(
+                    map.getCols() * tileSize,
+                    map.getRows() * tileSize,
+                    map
+            );
+            world.setPlayer(player);
+            Ghost red = new Ghost(
+                    ghostSpawn.col() * tileSize
+                            + (tileSize - Ghost.SIZE) / 2.0,
+                    ghostSpawn.row() * tileSize
+                            + (tileSize - Ghost.SIZE) / 2.0,
+                    Color.RED,
+                    GhostPersonality.RED,
+                    0
+            );
 
-        for (int frame = 0; frame < 180 && !red.hasLeftGhostHouse(); frame++) {
-            red.update(world, 1.0 / 60.0);
+            for (int frame = 0;
+                 frame < 180 && !red.hasLeftGhostHouse();
+                 frame++) {
+                red.update(world, 1.0 / 60.0);
+            }
+
+            assertTrue(red.isReleased());
+            assertTrue(
+                    red.hasLeftGhostHouse(),
+                    "Ghost did not leave maze " + mazeNumber
+            );
         }
-
-        assertTrue(red.isReleased());
-        assertTrue(red.hasLeftGhostHouse());
     }
 }
