@@ -56,7 +56,6 @@ public class GameLoop implements Runnable {
     }
 
     private void update(double deltaTime) {
-        panel.updateInput();
-        world.update(deltaTime);
+            world.update(deltaTime);
     }
 }

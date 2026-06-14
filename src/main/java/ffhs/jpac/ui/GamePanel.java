@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.KeyAdapter;
@@ -22,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.function.IntFunction;
 
 public class GamePanel extends JPanel {
 
@@ -90,10 +92,6 @@ public class GamePanel extends JPanel {
         };
         addMouseMotionListener(menuMouseAdapter);
         addMouseListener(menuMouseAdapter);
-    }
-
-    public void updateInput() {
-        // Input is handled directly by the Swing listeners.
     }
 
     private void handleKeyPressed(KeyEvent event) {
@@ -200,9 +198,6 @@ public class GamePanel extends JPanel {
             case KeyEvent.VK_LEFT -> player.setDesiredDirection(Direction.LEFT);
             case KeyEvent.VK_DOWN -> player.setDesiredDirection(Direction.DOWN);
             case KeyEvent.VK_UP -> player.setDesiredDirection(Direction.UP);
-            default -> {
-                // Other keys do not affect gameplay.
-            }
         }
     }
 
@@ -228,29 +223,26 @@ public class GamePanel extends JPanel {
 
     private void handleMenuMouseMoved(MouseEvent event) {
         if (world.getGameState() == GameState.START_MENU) {
-            for (int index = 0; index < MENU_OPTIONS.length; index++) {
-                if (getMenuOptionBounds(index).contains(event.getPoint())) {
-                    selectedMenuOption = index;
-                    repaint();
-                    return;
-                }
-            }
+            selectedMenuOption = updateHoveredOption(
+                    event.getPoint(),
+                    MENU_OPTIONS.length,
+                    this::getMenuOptionBounds,
+                    selectedMenuOption
+            );
         } else if (world.getGameState() == GameState.MAZE_SELECTION) {
-            for (int index = 0; index < MAZE_OPTIONS.length; index++) {
-                if (getMazeOptionBounds(index).contains(event.getPoint())) {
-                    selectedMazeOption = index;
-                    repaint();
-                    return;
-                }
-            }
+            selectedMazeOption = updateHoveredOption(
+                    event.getPoint(),
+                    MAZE_OPTIONS.length,
+                    this::getMazeOptionBounds,
+                    selectedMazeOption
+            );
         } else if (isEndScreen()) {
-            for (int index = 0; index < END_OPTIONS.length; index++) {
-                if (getEndOptionBounds(index).contains(event.getPoint())) {
-                    selectedEndOption = index;
-                    repaint();
-                    return;
-                }
-            }
+            selectedEndOption = updateHoveredOption(
+                    event.getPoint(),
+                    END_OPTIONS.length,
+                    this::getEndOptionBounds,
+                    selectedEndOption
+            );
         }
     }
 
@@ -303,6 +295,23 @@ public class GamePanel extends JPanel {
         return (current + change + optionCount) % optionCount;
     }
 
+    private int updateHoveredOption(
+            Point mousePosition,
+            int optionCount,
+            IntFunction<Rectangle> boundsProvider,
+            int currentSelection
+    ) {
+        for (int index = 0; index < optionCount; index++) {
+            if (boundsProvider.apply(index).contains(mousePosition)) {
+                if (index != currentSelection) {
+                    repaint();
+                }
+                return index;
+            }
+        }
+        return currentSelection;
+    }
+
     private void activateMenuOption(int optionIndex) {
         switch (optionIndex) {
             case 0 -> {
@@ -311,9 +320,6 @@ public class GamePanel extends JPanel {
             }
             case 1 -> world.showHighscores();
             case 2 -> exitAction.run();
-            default -> {
-                // The selected index always belongs to a menu option.
-            }
         }
     }
 
@@ -336,9 +342,6 @@ public class GamePanel extends JPanel {
                 setMenuSize();
             }
             case 2 -> exitAction.run();
-            default -> {
-                // The selected index always belongs to an end option.
-            }
         }
     }
 
@@ -513,27 +516,15 @@ public class GamePanel extends JPanel {
         super.paintComponent(graphics);
 
         switch (world.getGameState()) {
-            case START_MENU -> {
-                renderMainMenu(graphics);
-                return;
-            }
-            case NAME_INPUT -> {
-                renderNameInput(graphics);
-                return;
-            }
-            case MAZE_SELECTION -> {
-                renderMazeSelection(graphics);
-                return;
-            }
-            case HIGHSCORE -> {
-                renderHighscoreScreen(graphics);
-                return;
-            }
-            default -> {
-                // Gameplay and end screens render the world.
-            }
+            case START_MENU -> renderMainMenu(graphics);
+            case NAME_INPUT -> renderNameInput(graphics);
+            case MAZE_SELECTION -> renderMazeSelection(graphics);
+            case HIGHSCORE -> renderHighscoreScreen(graphics);
+            case PLAYING, GAME_OVER, WIN -> renderGameplay(graphics);
         }
+    }
 
+    private void renderGameplay(Graphics graphics) {
         renderMaze(graphics);
         renderPellets(graphics);
         renderEntities(graphics);

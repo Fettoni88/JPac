@@ -63,15 +63,20 @@ public final class MazeLoader {
         }
 
         List<String> pattern = mazeData.getPattern();
+        validateDimensions(pattern);
+        SpawnCounts spawnCounts = validateSymbolsAndCountSpawns(pattern);
+        validateRequiredSpawns(spawnCounts);
+        validateGhostHouse(pattern);
+        validateConnectedPaths(pattern);
+        validatePlayerPaths(pattern);
+    }
+
+    private static void validateDimensions(List<String> pattern) {
         if (pattern.size() != MAZE_HEIGHT) {
             throw new IllegalArgumentException(
                     "Maze height must be exactly " + MAZE_HEIGHT + " rows"
             );
         }
-
-        int playerSpawns = 0;
-        int ghostSpawns = 0;
-        int exits = 0;
 
         for (int row = 0; row < pattern.size(); row++) {
             String line = pattern.get(row);
@@ -81,21 +86,21 @@ public final class MazeLoader {
                                 + MAZE_WIDTH + " characters wide"
                 );
             }
+        }
+    }
 
+    private static SpawnCounts validateSymbolsAndCountSpawns(
+            List<String> pattern
+    ) {
+        int playerSpawns = 0;
+        int ghostSpawns = 0;
+        int exits = 0;
+
+        for (int row = 0; row < pattern.size(); row++) {
+            String line = pattern.get(row);
             for (int col = 0; col < line.length(); col++) {
                 char symbol = line.charAt(col);
-                if (!SUPPORTED_SYMBOLS.contains(symbol)) {
-                    throw new IllegalArgumentException(
-                            "Unsupported maze symbol '" + symbol
-                                    + "' at row " + row + ", col " + col
-                    );
-                }
-
-                if (isBorder(row, col) && symbol != '#') {
-                    throw new IllegalArgumentException(
-                            "Maze must be enclosed by walls"
-                    );
-                }
+                validateSymbol(symbol, row, col);
 
                 if (symbol == 'P') {
                     playerSpawns++;
@@ -107,27 +112,42 @@ public final class MazeLoader {
             }
         }
 
-        if (playerSpawns != 1) {
+        return new SpawnCounts(playerSpawns, ghostSpawns, exits);
+    }
+
+    private static void validateSymbol(char symbol, int row, int col) {
+        if (!SUPPORTED_SYMBOLS.contains(symbol)) {
+            throw new IllegalArgumentException(
+                    "Unsupported maze symbol '" + symbol
+                            + "' at row " + row + ", col " + col
+            );
+        }
+
+        if (isBorder(row, col) && symbol != '#') {
+            throw new IllegalArgumentException(
+                    "Maze must be enclosed by walls"
+            );
+        }
+    }
+
+    private static void validateRequiredSpawns(SpawnCounts counts) {
+        if (counts.playerSpawns() != 1) {
             throw new IllegalArgumentException(
                     "Maze must contain exactly one player spawn P"
             );
         }
 
-        if (ghostSpawns < 4) {
+        if (counts.ghostSpawns() < 4) {
             throw new IllegalArgumentException(
                     "Maze must contain at least four ghost spawns G"
             );
         }
 
-        if (exits < 1) {
+        if (counts.exits() < 1) {
             throw new IllegalArgumentException(
                     "Maze must contain at least one ghost house exit E"
             );
         }
-
-        validateGhostHouse(pattern);
-        validateConnectedPaths(pattern);
-        validatePlayerPaths(pattern);
     }
 
     private static boolean isBorder(int row, int col) {
@@ -371,5 +391,12 @@ public final class MazeLoader {
                 && position.row() < MAZE_HEIGHT
                 && position.col() >= 0
                 && position.col() < MAZE_WIDTH;
+    }
+
+    private record SpawnCounts(
+            int playerSpawns,
+            int ghostSpawns,
+            int exits
+    ) {
     }
 }
