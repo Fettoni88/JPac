@@ -41,6 +41,13 @@ class GamePanelTest {
     }
 
     @Test
+    void gameplayEntitiesUseScaledSizes() {
+        assertEquals(18, new Player(0, 0).getSize());
+        assertEquals(18, new Ghost(0, 0, Color.RED).getSize());
+        assertEquals(5, new Pellet(0, 0).getSize());
+    }
+
+    @Test
     void gameplayRendersMazeBelowHudBar() {
         TestGame testGame = createTestGame(43, 43);
         Dimension size = testGame.panel().getPreferredSize();
@@ -132,7 +139,7 @@ class GamePanelTest {
 
     @Test
     void arrowKeyMovesPlayerOnlyAfterNameIsConfirmed() {
-        TestGame testGame = createTestGame(331, 427);
+        TestGame testGame = createTestGame(243, 315);
         testGame.world().generatePellets();
 
         pressKey(
@@ -141,7 +148,7 @@ class GamePanelTest {
                 KeyEvent.CHAR_UNDEFINED
         );
         testGame.world().update(1.0);
-        assertEquals(331, testGame.player().getX(), 0.0001);
+        assertEquals(243, testGame.player().getX(), 0.0001);
 
         pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
         pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
@@ -155,8 +162,8 @@ class GamePanelTest {
             testGame.world().update(1.0 / 60.0);
         }
 
-        assertTrue(testGame.player().getX() > 350);
-        assertEquals(427, testGame.player().getY(), 0.0001);
+        assertTrue(testGame.player().getX() > 262);
+        assertEquals(315, testGame.player().getY(), 0.0001);
     }
 
     private TestGame createTestGame(double playerX, double playerY) {

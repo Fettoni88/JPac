@@ -2,7 +2,7 @@ package ffhs.jpac.world;
 
 public class Player extends MovingEntity {
 
-    private static final int SIZE = 10;
+    public static final int SIZE = 18;
     private Direction currentDirection = Direction.NONE;
     private Direction desiredDirection = Direction.NONE;
 

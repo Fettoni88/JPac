@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class Ghost extends MovingEntity {
 
-    private static final int SIZE = 10;
+    public static final int SIZE = 18;
     private static final double SPEED = 100.0;
     private static final double ATTACK_RANGE = 20;
     private static final double ORANGE_CHASE_RANGE = 150;

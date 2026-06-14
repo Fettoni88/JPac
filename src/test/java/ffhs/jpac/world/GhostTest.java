@@ -25,30 +25,30 @@ class GhostTest {
 
     @Test
     void delayedGhostWaitsBeforeMoving() {
-        Player player = new Player(331, 427);
+        Player player = new Player(243, 315);
         World world = createWorld(player);
         Ghost pink = new Ghost(
-                331, 267, Color.PINK, GhostPersonality.PINK, 3
+                243, 195, Color.PINK, GhostPersonality.PINK, 3
         );
 
         pink.update(world, 2.9);
         pink.update(world, 0.1);
 
         assertTrue(pink.isReleased());
-        assertEquals(331, pink.getX(), 0.0001);
-        assertEquals(267, pink.getY(), 0.0001);
+        assertEquals(243, pink.getX(), 0.0001);
+        assertEquals(195, pink.getY(), 0.0001);
 
         pink.update(world, 0.1);
 
-        assertNotEquals(267, pink.getY(), 0.0001);
+        assertNotEquals(195, pink.getY(), 0.0001);
     }
 
     @Test
     void restartResetsReleaseDelay() {
-        Player player = new Player(331, 427);
+        Player player = new Player(243, 315);
         World world = createWorld(player);
         Ghost cyan = new Ghost(
-                363, 267, Color.CYAN, GhostPersonality.CYAN, 6
+                267, 195, Color.CYAN, GhostPersonality.CYAN, 6
         );
 
         cyan.update(world, 6);
@@ -57,16 +57,16 @@ class GhostTest {
         cyan.reset();
 
         assertFalse(cyan.isReleased());
-        assertEquals(363, cyan.getX(), 0.0001);
-        assertEquals(267, cyan.getY(), 0.0001);
+        assertEquals(267, cyan.getX(), 0.0001);
+        assertEquals(195, cyan.getY(), 0.0001);
     }
 
     @Test
     void ghostMovementStaysOnOneGridLane() {
-        Player player = new Player(331, 427);
+        Player player = new Player(243, 315);
         World world = createWorld(player);
         Ghost red = new Ghost(
-                299, 267, Color.RED, GhostPersonality.RED, 0
+                219, 195, Color.RED, GhostPersonality.RED, 0
         );
 
         double oldX = red.getX();
@@ -80,10 +80,10 @@ class GhostTest {
 
     @Test
     void releasedGhostKeepsMovingBeyondSpawnTile() {
-        Player player = new Player(331, 427);
+        Player player = new Player(243, 315);
         World world = createWorld(player);
         Ghost red = new Ghost(
-                299, 267, Color.RED, GhostPersonality.RED, 0
+                219, 195, Color.RED, GhostPersonality.RED, 0
         );
 
         for (int frame = 0; frame < 120; frame++) {
@@ -91,18 +91,18 @@ class GhostTest {
         }
 
         double distanceFromSpawn = Math.hypot(
-                red.getX() - 299,
-                red.getY() - 267
+                red.getX() - 219,
+                red.getY() - 195
         );
         assertTrue(distanceFromSpawn > 20);
     }
 
     @Test
     void redGhostLeavesGhostHouseInsteadOfPushingIntoWall() {
-        Player player = new Player(331, 427);
+        Player player = new Player(243, 315);
         World world = createWorld(player);
         Ghost red = new Ghost(
-                299, 267, Color.RED, GhostPersonality.RED, 0
+                219, 195, Color.RED, GhostPersonality.RED, 0
         );
 
         for (int frame = 0; frame < 120; frame++) {
@@ -110,13 +110,13 @@ class GhostTest {
         }
 
         assertTrue(red.hasLeftGhostHouse());
-        assertTrue(red.getY() >= 352);
+        assertTrue(red.getY() >= 264);
     }
 
     @Test
     void ghostsKeepTheirConfiguredPersonalities() {
         Ghost orange = new Ghost(
-                331, 299, Color.ORANGE, GhostPersonality.ORANGE, 9
+                243, 219, Color.ORANGE, GhostPersonality.ORANGE, 9
         );
 
         assertEquals(GhostPersonality.ORANGE, orange.getPersonality());
@@ -125,13 +125,13 @@ class GhostTest {
 
     @Test
     void allGhostsUseTheirDelayThenLeaveThroughExit() {
-        Player player = new Player(43, 43);
+        Player player = new Player(27, 27);
         World world = createWorld(player);
         Ghost[] ghosts = {
-                new Ghost(299, 267, Color.RED, GhostPersonality.RED, 0),
-                new Ghost(331, 267, Color.PINK, GhostPersonality.PINK, 3),
-                new Ghost(363, 267, Color.CYAN, GhostPersonality.CYAN, 6),
-                new Ghost(331, 299, Color.ORANGE, GhostPersonality.ORANGE, 9)
+                new Ghost(219, 195, Color.RED, GhostPersonality.RED, 0),
+                new Ghost(243, 195, Color.PINK, GhostPersonality.PINK, 3),
+                new Ghost(267, 195, Color.CYAN, GhostPersonality.CYAN, 6),
+                new Ghost(243, 219, Color.ORANGE, GhostPersonality.ORANGE, 9)
         };
 
         for (int second = 0; second < 11; second++) {
@@ -150,19 +150,19 @@ class GhostTest {
 
     @Test
     void ghostReleaseUsesCenterColumnBeforeDoorway() {
-        Player player = new Player(43, 43);
+        Player player = new Player(27, 27);
         World world = createWorld(player);
         Ghost red = new Ghost(
-                299, 267, Color.RED, GhostPersonality.RED, 0
+                219, 195, Color.RED, GhostPersonality.RED, 0
         );
 
         for (int frame = 0; frame < 20; frame++) {
             red.update(world, 1.0 / 60.0);
         }
 
-        assertEquals(331, red.getX(), 0.0001);
-        assertTrue(red.getY() > 267);
-        assertTrue(red.getY() < 331);
+        assertEquals(243, red.getX(), 0.0001);
+        assertTrue(red.getY() > 195);
+        assertTrue(red.getY() < 243);
         assertFalse(red.hasLeftGhostHouse());
     }
 
@@ -173,8 +173,10 @@ class GhostTest {
         MazePosition ghostSpawn = map.getGhostSpawns().getFirst();
         int tileSize = map.getTileSize();
         Player player = new Player(
-                playerSpawn.col() * tileSize + 11,
-                playerSpawn.row() * tileSize + 11
+                playerSpawn.col() * tileSize
+                        + (tileSize - Player.SIZE) / 2.0,
+                playerSpawn.row() * tileSize
+                        + (tileSize - Player.SIZE) / 2.0
         );
         World world = new World(
                 map.getCols() * tileSize,
@@ -183,8 +185,10 @@ class GhostTest {
         );
         world.setPlayer(player);
         Ghost red = new Ghost(
-                ghostSpawn.col() * tileSize + 11,
-                ghostSpawn.row() * tileSize + 11,
+                ghostSpawn.col() * tileSize
+                        + (tileSize - Ghost.SIZE) / 2.0,
+                ghostSpawn.row() * tileSize
+                        + (tileSize - Ghost.SIZE) / 2.0,
                 Color.RED,
                 GhostPersonality.RED,
                 0

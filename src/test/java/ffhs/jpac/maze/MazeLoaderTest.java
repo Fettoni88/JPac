@@ -23,6 +23,7 @@ class MazeLoaderTest {
 
             assertEquals(MazeLoader.MAZE_HEIGHT, tileMap.getRows());
             assertEquals(MazeLoader.MAZE_WIDTH, tileMap.getCols());
+            assertEquals(24, tileMap.getTileSize());
             assertEquals(1, countSymbol(mazeData, 'P'));
             assertTrue(tileMap.getGhostSpawns().size() >= 4);
             assertFalse(tileMap.getPelletPositions().isEmpty());

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class TileMap {
 
-    private static final int TILE_SIZE = 32;
+    private static final int TILE_SIZE = 24;
 
     private static final int FLOOR = 0;
     private static final int WALL = 1;

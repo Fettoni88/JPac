@@ -27,8 +27,8 @@ public class GameWindow {
 
         World world = new World(worldWidth, worldHeight, map);
         Player player = new Player(
-                spawnX(map.getPlayerSpawn(), map, 10),
-                spawnY(map.getPlayerSpawn(), map, 10)
+                spawnX(map.getPlayerSpawn(), map, Player.SIZE),
+                spawnY(map.getPlayerSpawn(), map, Player.SIZE)
         );
         world.addEntity(player);
 
@@ -50,8 +50,8 @@ public class GameWindow {
         for (int index = 0; index < 4; index++) {
             MazePosition spawn = ghostSpawns.get(index);
             world.addEntity(new Ghost(
-                    spawnX(spawn, map, 10),
-                    spawnY(spawn, map, 10),
+                    spawnX(spawn, map, Ghost.SIZE),
+                    spawnY(spawn, map, Ghost.SIZE),
                     colors[index],
                     personalities[index],
                     releaseDelays[index]

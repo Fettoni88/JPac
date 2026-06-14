@@ -2,7 +2,7 @@ package ffhs.jpac.world;
 
 public class Pellet extends Entity {
 
-    private static final int SIZE = 6;
+    public static final int SIZE = 5;
     private boolean collected = false;
 
     public Pellet(double x, double y) {

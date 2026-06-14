@@ -292,8 +292,10 @@ public class World {
 
         int tileSize = map.getTileSize();
         for (MazePosition position : map.getPelletPositions()) {
-            double x = position.col() * tileSize + tileSize / 2.0 - 3;
-            double y = position.row() * tileSize + tileSize / 2.0 - 3;
+            double x = position.col() * tileSize
+                    + (tileSize - Pellet.SIZE) / 2.0;
+            double y = position.row() * tileSize
+                    + (tileSize - Pellet.SIZE) / 2.0;
             pellets.add(new Pellet(x, y));
         }
     }
