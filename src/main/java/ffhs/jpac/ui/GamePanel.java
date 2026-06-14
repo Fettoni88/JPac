@@ -31,6 +31,7 @@ public class GamePanel extends JPanel {
     private static final int MENU_START_Y = 280;
     private static final int MENU_SPACING = 60;
     private static final int MAX_NAME_LENGTH = 20;
+    private static final int HUD_HEIGHT = 40;
 
     private final Player player;
     private final TileRenderer tileRenderer;
@@ -38,8 +39,6 @@ public class GamePanel extends JPanel {
     private final World world;
     private final StringBuilder nameInput = new StringBuilder();
     private int selectedMenuOption;
-    private double cameraX;
-    private double cameraY;
 
     public GamePanel(Player player, TileMap map, World world) {
         this.player = player;
@@ -47,7 +46,9 @@ public class GamePanel extends JPanel {
         this.map = map;
         this.tileRenderer = new TileRenderer(map);
 
-        setPreferredSize(new Dimension(800, 600));
+        int panelWidth = map.getCols() * map.getTileSize();
+        int panelHeight = map.getRows() * map.getTileSize() + HUD_HEIGHT;
+        setPreferredSize(new Dimension(panelWidth, panelHeight));
         setBackground(Color.BLACK);
         setFocusable(true);
 
@@ -120,7 +121,6 @@ public class GamePanel extends JPanel {
         if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             world.startGame(nameInput.toString());
             nameInput.setLength(0);
-            resetCamera();
             return;
         }
 
@@ -155,7 +155,6 @@ public class GamePanel extends JPanel {
         if (event.getKeyCode() == KeyEvent.VK_R) {
             world.restartGame();
             selectedMenuOption = 0;
-            resetCamera();
         }
     }
 
@@ -206,11 +205,6 @@ public class GamePanel extends JPanel {
                 // The selected index always belongs to a menu option.
             }
         }
-    }
-
-    private void resetCamera() {
-        cameraX = 0;
-        cameraY = 0;
     }
 
     private void renderMainMenu(Graphics graphics) {
@@ -361,19 +355,9 @@ public class GamePanel extends JPanel {
             }
         }
 
-        updateCamera();
-        int camX = (int) cameraX;
-        int camY = (int) cameraY;
-
-        tileRenderer.render(
-                graphics,
-                camX,
-                camY,
-                getWidth(),
-                getHeight()
-        );
-        renderPellets(graphics, camX, camY);
-        renderEntities(graphics, camX, camY);
+        renderMaze(graphics);
+        renderPellets(graphics);
+        renderEntities(graphics);
         renderHud(graphics);
 
         if (world.getGameState() == GameState.WIN) {
@@ -383,30 +367,32 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private void updateCamera() {
-        double targetX = player.getX() - getWidth() / 2.0;
-        double targetY = player.getY() - getHeight() / 2.0;
-        double smoothing = 0.05;
-
-        cameraX += (targetX - cameraX) * smoothing;
-        cameraY += (targetY - cameraY) * smoothing;
-
-        int worldWidth = map.getCols() * map.getTileSize();
-        int worldHeight = map.getRows() * map.getTileSize();
-        double maxCameraX = Math.max(0, worldWidth - getWidth());
-        double maxCameraY = Math.max(0, worldHeight - getHeight());
-
-        cameraX = Math.max(0, Math.min(maxCameraX, cameraX));
-        cameraY = Math.max(0, Math.min(maxCameraY, cameraY));
+    private void renderMaze(Graphics graphics) {
+        int mazeWidth = map.getCols() * map.getTileSize();
+        int mazeHeight = map.getRows() * map.getTileSize();
+        Graphics mazeGraphics = graphics.create(
+                0,
+                HUD_HEIGHT,
+                mazeWidth,
+                mazeHeight
+        );
+        tileRenderer.render(
+                mazeGraphics,
+                0,
+                0,
+                mazeWidth,
+                mazeHeight
+        );
+        mazeGraphics.dispose();
     }
 
-    private void renderPellets(Graphics graphics, int camX, int camY) {
+    private void renderPellets(Graphics graphics) {
         graphics.setColor(Color.YELLOW);
 
         for (Pellet pellet : world.getPellets()) {
             if (!pellet.isCollected()) {
-                int screenX = (int) pellet.getX() - camX;
-                int screenY = (int) pellet.getY() - camY;
+                int screenX = (int) pellet.getX();
+                int screenY = (int) pellet.getY() + HUD_HEIGHT;
                 graphics.fillOval(
                         screenX,
                         screenY,
@@ -417,10 +403,10 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private void renderEntities(Graphics graphics, int camX, int camY) {
+    private void renderEntities(Graphics graphics) {
         for (Entity entity : world.getEntities()) {
-            int screenX = (int) entity.getX() - camX;
-            int screenY = (int) entity.getY() - camY;
+            int screenX = (int) entity.getX();
+            int screenY = (int) entity.getY() + HUD_HEIGHT;
 
             if (entity instanceof Player) {
                 graphics.setColor(Color.YELLOW);
@@ -440,20 +426,18 @@ public class GamePanel extends JPanel {
     }
 
     private void renderHud(Graphics graphics) {
-        graphics.setColor(Color.BLACK);
-        graphics.fillRect(10, 5, 220, 45);
+        graphics.setColor(new Color(20, 20, 20));
+        graphics.fillRect(0, 0, getWidth(), HUD_HEIGHT);
 
         graphics.setColor(Color.WHITE);
-        graphics.drawString("Score: " + world.getScore(), 20, 22);
+        graphics.drawString("Score: " + world.getScore(), 15, 25);
 
         HighscoreEntry bestHighscore = world.getBestHighscore();
         if (bestHighscore != null) {
-            graphics.drawString(
-                    "Best: " + bestHighscore.getName()
-                            + " " + bestHighscore.getScore(),
-                    20,
-                    42
-            );
+            String bestText = "Best: " + bestHighscore.getName()
+                    + " " + bestHighscore.getScore();
+            int textWidth = graphics.getFontMetrics().stringWidth(bestText);
+            graphics.drawString(bestText, getWidth() - textWidth - 15, 25);
         }
     }
 }

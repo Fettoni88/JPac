@@ -10,11 +10,13 @@ import ffhs.jpac.world.World;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +25,38 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GamePanelTest {
+
+    @Test
+    void panelSizeIncludesMapAndHudBar() {
+        TestGame testGame = createTestGame(43, 43);
+        TileMap map = testGame.world().getMap();
+
+        assertEquals(
+                new Dimension(
+                        map.getCols() * map.getTileSize(),
+                        map.getRows() * map.getTileSize() + 40
+                ),
+                testGame.panel().getPreferredSize()
+        );
+    }
+
+    @Test
+    void gameplayRendersMazeBelowHudBar() {
+        TestGame testGame = createTestGame(43, 43);
+        Dimension size = testGame.panel().getPreferredSize();
+        testGame.panel().setSize(size);
+        testGame.world().startGame();
+        BufferedImage image = new BufferedImage(
+                size.width,
+                size.height,
+                BufferedImage.TYPE_INT_RGB
+        );
+
+        testGame.panel().paint(image.getGraphics());
+
+        assertEquals(new Color(20, 20, 20).getRGB(), image.getRGB(2, 20));
+        assertEquals(Color.DARK_GRAY.getRGB(), image.getRGB(2, 42));
+    }
 
     @Test
     void startOptionOpensNameInputAndEnterStartsGame() {
