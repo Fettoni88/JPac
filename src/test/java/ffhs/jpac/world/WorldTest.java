@@ -166,6 +166,39 @@ class WorldTest {
     }
 
     @Test
+    void gameOverSavesPlayerHighscoreOnlyOnce() throws IOException {
+        TileMap map = new TileMap("/maps/map.txt");
+        Path file = Files.createTempFile("jpac-game-over-highscores", ".json");
+        Files.deleteIfExists(file);
+        HighscoreManager manager = new HighscoreManager(file);
+        World world = new World(
+                map.getCols() * map.getTileSize(),
+                map.getRows() * map.getTileSize(),
+                map,
+                "Felipe",
+                manager
+        );
+        Player player = new Player(43, 43);
+        Ghost ghost = new Ghost(43, 43, Color.RED);
+        world.setPlayer(player);
+        world.addEntity(player);
+        world.addEntity(ghost);
+        world.addPellet(new Pellet(45, 45));
+        world.addPellet(new Pellet(75, 43));
+        world.startGame();
+
+        world.update(0.0);
+        world.update(0.0);
+
+        List<HighscoreEntry> highscores = manager.loadHighscores();
+        assertEquals(GameState.GAME_OVER, world.getGameState());
+        assertEquals(1, highscores.size());
+        assertEquals("Felipe", highscores.get(0).getName());
+        assertEquals(10, highscores.get(0).getScore());
+        assertEquals(1, world.getHighscores().size());
+    }
+
+    @Test
     void pelletsOnlyUseReachableNormalFloorTiles() {
         World world = createWorld();
         Player player = new Player(331, 427);

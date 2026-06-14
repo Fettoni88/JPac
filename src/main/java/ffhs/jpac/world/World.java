@@ -159,9 +159,17 @@ public class World {
         checkGhostCollision();
 
         if (gameState == GameState.PLAYING && areAllPelletsCollected()) {
-            gameState = GameState.WIN;
-            saveHighscore();
+            endGame(GameState.WIN);
         }
+    }
+
+    private void endGame(GameState endState) {
+        if (gameState != GameState.PLAYING) {
+            return;
+        }
+
+        gameState = endState;
+        saveHighscore();
     }
 
     private void saveHighscore() {
@@ -267,7 +275,8 @@ public class World {
             if (entity instanceof Ghost ghost
                     && ghost.isReleased()
                     && isOverlapping(player, ghost)) {
-                gameState = GameState.GAME_OVER;
+                endGame(GameState.GAME_OVER);
+                return;
             }
         }
     }

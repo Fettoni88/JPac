@@ -141,14 +141,10 @@ public class GamePanel extends JPanel {
 
     private void handleGameplayKeyPressed(KeyEvent event) {
         switch (event.getKeyCode()) {
-            case KeyEvent.VK_RIGHT ->
-                    player.setDesiredDirection(Direction.RIGHT);
-            case KeyEvent.VK_LEFT ->
-                    player.setDesiredDirection(Direction.LEFT);
-            case KeyEvent.VK_DOWN ->
-                    player.setDesiredDirection(Direction.DOWN);
-            case KeyEvent.VK_UP ->
-                    player.setDesiredDirection(Direction.UP);
+            case KeyEvent.VK_RIGHT -> player.setDesiredDirection(Direction.RIGHT);
+            case KeyEvent.VK_LEFT -> player.setDesiredDirection(Direction.LEFT);
+            case KeyEvent.VK_DOWN -> player.setDesiredDirection(Direction.DOWN);
+            case KeyEvent.VK_UP -> player.setDesiredDirection(Direction.UP);
             default -> {
                 // Other keys do not affect gameplay.
             }
@@ -292,28 +288,49 @@ public class GamePanel extends JPanel {
         drawCentered(graphics, "ESC oder Backspace: Zurueck", 550);
     }
 
-    private void renderEndScreen(
-            Graphics graphics,
-            String title,
-            boolean showFinalScore
-    ) {
+    private void renderEndScreen(Graphics graphics, String title) {
         graphics.setColor(new Color(0, 0, 0, 210));
         graphics.fillRect(0, 0, getWidth(), getHeight());
 
         graphics.setColor(Color.YELLOW);
         graphics.setFont(graphics.getFont().deriveFont(42f));
-        drawCentered(graphics, title, 240);
+        drawCentered(graphics, title, 75);
 
         graphics.setColor(Color.WHITE);
         graphics.setFont(graphics.getFont().deriveFont(22f));
-        if (showFinalScore) {
+        drawCentered(
+                graphics,
+                "Final Score: " + world.getScore(),
+                120
+        );
+
+        HighscoreEntry bestHighscore = world.getBestHighscore();
+        if (bestHighscore != null) {
             drawCentered(
                     graphics,
-                    "Final Score: " + world.getScore(),
-                    290
+                    "Best: " + bestHighscore.getName()
+                            + " - " + bestHighscore.getScore(),
+                    150
             );
         }
-        drawCentered(graphics, "Press R for Main Menu", 330);
+
+        graphics.setColor(Color.YELLOW);
+        graphics.setFont(graphics.getFont().deriveFont(20f));
+        drawCentered(graphics, "Top Highscores", 195);
+
+        graphics.setFont(graphics.getFont().deriveFont(17f));
+        List<HighscoreEntry> highscores = world.getHighscores();
+        for (int index = 0; index < highscores.size(); index++) {
+            HighscoreEntry entry = highscores.get(index);
+            graphics.setColor(index == 0 ? Color.YELLOW : Color.WHITE);
+            String line = (index + 1) + ". "
+                    + entry.getName() + " - " + entry.getScore();
+            drawCentered(graphics, line, 225 + index * 25);
+        }
+
+        graphics.setColor(Color.LIGHT_GRAY);
+        graphics.setFont(graphics.getFont().deriveFont(18f));
+        drawCentered(graphics, "Press R for Main Menu", 535);
     }
 
     private void drawCentered(Graphics graphics, String text, int y) {
@@ -360,9 +377,9 @@ public class GamePanel extends JPanel {
         renderHud(graphics);
 
         if (world.getGameState() == GameState.WIN) {
-            renderEndScreen(graphics, "YOU WIN!", true);
+            renderEndScreen(graphics, "YOU WIN!");
         } else if (world.getGameState() == GameState.GAME_OVER) {
-            renderEndScreen(graphics, "GAME OVER", false);
+            renderEndScreen(graphics, "GAME OVER");
         }
     }
 
