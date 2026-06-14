@@ -26,6 +26,9 @@ class MazeLoaderTest {
             assertEquals(24, tileMap.getTileSize());
             assertEquals(1, countSymbol(mazeData, 'P'));
             assertTrue(tileMap.getGhostSpawns().size() >= 4);
+            assertFalse(tileMap.getGhostHouseExits().isEmpty());
+            assertEquals("maze" + mazeNumber, tileMap.getMazeId());
+            assertEquals("Maze " + mazeNumber, tileMap.getMazeName());
             assertFalse(tileMap.getPelletPositions().isEmpty());
             assertFalse(
                     tileMap.getPelletPositions().contains(
@@ -83,8 +86,8 @@ class MazeLoaderTest {
     @Test
     void missingGhostSpawnsThrowsMeaningfulException() {
         List<String> pattern = createValidPattern();
-        for (int row = 3; row <= 6; row++) {
-            pattern.set(row, replaceSymbol(pattern.get(row), 3, '.'));
+        for (int row = 0; row < pattern.size(); row++) {
+            pattern.set(row, pattern.get(row).replace('G', 'H'));
         }
 
         IllegalArgumentException exception = assertThrows(
@@ -97,6 +100,21 @@ class MazeLoaderTest {
         assertTrue(exception.getMessage().contains("ghost spawns"));
     }
 
+    @Test
+    void missingGhostHouseExitThrowsMeaningfulException() {
+        List<String> pattern = createValidPattern();
+        pattern.set(3, pattern.get(3).replace('E', '.'));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> MazeLoader.validate(
+                        new MazeData("No exit", pattern)
+                )
+        );
+
+        assertTrue(exception.getMessage().contains("exit"));
+    }
+
     private List<String> createValidPattern() {
         List<String> pattern = new ArrayList<>();
         pattern.add("#".repeat(MazeLoader.MAZE_WIDTH));
@@ -107,12 +125,19 @@ class MazeLoaderTest {
 
         pattern.add("#".repeat(MazeLoader.MAZE_WIDTH));
         pattern.set(2, replaceSymbol(pattern.get(2), 2, 'P'));
-
-        for (int row = 3; row <= 6; row++) {
-            pattern.set(row, replaceSymbol(pattern.get(row), 3, 'G'));
-        }
+        pattern.set(3, replaceSection(pattern.get(3), 9, "##E###"));
+        pattern.set(4, replaceSection(pattern.get(4), 9, "#HHHH#"));
+        pattern.set(5, replaceSection(pattern.get(5), 9, "#HGGH#"));
+        pattern.set(6, replaceSection(pattern.get(6), 9, "#HGGH#"));
+        pattern.set(7, replaceSection(pattern.get(7), 9, "######"));
 
         return pattern;
+    }
+
+    private String replaceSection(String row, int start, String section) {
+        StringBuilder changedRow = new StringBuilder(row);
+        changedRow.replace(start, start + section.length(), section);
+        return changedRow.toString();
     }
 
     private String replaceSymbol(String row, int col, char symbol) {

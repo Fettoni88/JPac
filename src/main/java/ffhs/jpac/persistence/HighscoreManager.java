@@ -60,8 +60,17 @@ public class HighscoreManager {
     }
 
     public List<HighscoreEntry> addScore(String name, int score) {
+        return addScore(name, score, "", "Unknown Maze");
+    }
+
+    public List<HighscoreEntry> addScore(
+            String name,
+            int score,
+            String mazeId,
+            String mazeName
+    ) {
         List<HighscoreEntry> entries = loadHighscores();
-        entries.add(new HighscoreEntry(name, score));
+        entries.add(new HighscoreEntry(name, score, mazeId, mazeName));
 
         List<HighscoreEntry> preparedEntries = prepareHighscores(entries);
         saveHighscores(preparedEntries);

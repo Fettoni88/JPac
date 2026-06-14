@@ -272,7 +272,7 @@ class WorldTest {
     }
 
     @Test
-    void releasedGhostTreatsGhostHouseAsBlocked() {
+    void releasedGhostCanMoveInsideGhostHouse() {
         World world = createWorld();
         Player player = new Player(27, 27);
         Ghost ghost = new Ghost(
@@ -289,6 +289,61 @@ class WorldTest {
         ghost.setX(243);
         ghost.setY(267);
 
-        assertFalse(world.canMove(ghost, Direction.UP, 24));
+        assertTrue(world.canMove(ghost, Direction.UP, 24));
+    }
+
+    @Test
+    void selectedMazeBuildsCompleteGameplaySession() {
+        World world = createWorld();
+        world.showNameInput();
+        world.confirmPlayerName("Necib");
+
+        world.startMaze("maze4");
+
+        assertEquals(GameState.PLAYING, world.getGameState());
+        assertEquals("maze4", world.getMap().getMazeId());
+        assertEquals("Maze 4", world.getMap().getMazeName());
+        assertEquals(5, world.getEntities().size());
+        assertEquals(4, world.getEntities().stream()
+                .filter(Ghost.class::isInstance)
+                .count());
+        assertEquals(
+                world.getMap().getPelletPositions().size(),
+                world.getPellets().size()
+        );
+    }
+
+    @Test
+    void selectedMazeIsStoredWithHighscore() throws IOException {
+        TileMap initialMap = new TileMap("/mazes/maze1.json");
+        Path file = Files.createTempFile(
+                "jpac-selected-maze-highscores",
+                ".json"
+        );
+        Files.deleteIfExists(file);
+        HighscoreManager manager = new HighscoreManager(file);
+        World world = new World(
+                initialMap.getCols() * initialMap.getTileSize(),
+                initialMap.getRows() * initialMap.getTileSize(),
+                initialMap,
+                "Player",
+                manager
+        );
+        world.showNameInput();
+        world.confirmPlayerName("Felipe");
+        world.startMaze("maze5");
+
+        Ghost ghost = world.getEntities().stream()
+                .filter(Ghost.class::isInstance)
+                .map(Ghost.class::cast)
+                .findFirst()
+                .orElseThrow();
+        ghost.setX(world.getPlayer().getX());
+        ghost.setY(world.getPlayer().getY());
+        world.update(0);
+
+        HighscoreEntry entry = manager.loadHighscores().getFirst();
+        assertEquals("maze5", entry.getMazeId());
+        assertEquals("Maze 5", entry.getMazeName());
     }
 }

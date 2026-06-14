@@ -167,7 +167,7 @@ class GhostTest {
     }
 
     @Test
-    void jsonMazeGhostStartsNormalAiWithoutGhostHousePath() {
+    void jsonMazeGhostLeavesThroughGhostHouseExit() {
         TileMap map = new TileMap("/mazes/maze1.json");
         MazePosition playerSpawn = map.getPlayerSpawn();
         MazePosition ghostSpawn = map.getGhostSpawns().getFirst();
@@ -194,7 +194,9 @@ class GhostTest {
                 0
         );
 
-        red.update(world, 1.0 / 60.0);
+        for (int frame = 0; frame < 180 && !red.hasLeftGhostHouse(); frame++) {
+            red.update(world, 1.0 / 60.0);
+        }
 
         assertTrue(red.isReleased());
         assertTrue(red.hasLeftGhostHouse());

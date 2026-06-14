@@ -25,6 +25,8 @@ public final class MazeLoader {
             ' ',
             'P',
             'G',
+            'H',
+            'E',
             'o'
     );
 
@@ -68,6 +70,7 @@ public final class MazeLoader {
 
         int playerSpawns = 0;
         int ghostSpawns = 0;
+        int exits = 0;
 
         for (int row = 0; row < pattern.size(); row++) {
             String line = pattern.get(row);
@@ -97,6 +100,8 @@ public final class MazeLoader {
                     playerSpawns++;
                 } else if (symbol == 'G') {
                     ghostSpawns++;
+                } else if (symbol == 'E') {
+                    exits++;
                 }
             }
         }
@@ -113,7 +118,15 @@ public final class MazeLoader {
             );
         }
 
+        if (exits < 1) {
+            throw new IllegalArgumentException(
+                    "Maze must contain at least one ghost house exit E"
+            );
+        }
+
+        validateGhostHouse(pattern);
         validateConnectedPaths(pattern);
+        validatePlayerPaths(pattern);
     }
 
     private static boolean isBorder(int row, int col) {
@@ -160,6 +173,128 @@ public final class MazeLoader {
                     "All maze paths and spawn points must be connected"
             );
         }
+    }
+
+    private static void validateGhostHouse(List<String> pattern) {
+        for (int row = 0; row < pattern.size(); row++) {
+            for (int col = 0; col < pattern.get(row).length(); col++) {
+                char symbol = pattern.get(row).charAt(col);
+                if (symbol == 'E'
+                        && !hasNeighbor(pattern, row, col, 'H', 'G')) {
+                    throw new IllegalArgumentException(
+                            "Ghost house exit E must be next to H or G"
+                    );
+                }
+
+                if (symbol == 'G'
+                        && !hasNeighbor(pattern, row, col, 'H', 'G')) {
+                    throw new IllegalArgumentException(
+                            "Ghost spawn G must be inside the ghost house"
+                    );
+                }
+            }
+        }
+    }
+
+    private static boolean hasNeighbor(
+            List<String> pattern,
+            int row,
+            int col,
+            char firstSymbol,
+            char secondSymbol
+    ) {
+        for (MazePosition neighbor : List.of(
+                new MazePosition(row - 1, col),
+                new MazePosition(row + 1, col),
+                new MazePosition(row, col - 1),
+                new MazePosition(row, col + 1)
+        )) {
+            if (neighbor.row() < 0
+                    || neighbor.row() >= MAZE_HEIGHT
+                    || neighbor.col() < 0
+                    || neighbor.col() >= MAZE_WIDTH) {
+                continue;
+            }
+
+            char symbol = pattern.get(neighbor.row())
+                    .charAt(neighbor.col());
+            if (symbol == firstSymbol || symbol == secondSymbol) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void validatePlayerPaths(List<String> pattern) {
+        MazePosition start = findSymbol(pattern, 'P');
+        Set<MazePosition> visited = new HashSet<>();
+        Queue<MazePosition> open = new ArrayDeque<>();
+        visited.add(start);
+        open.add(start);
+
+        while (!open.isEmpty()) {
+            MazePosition current = open.remove();
+            for (MazePosition neighbor : List.of(
+                    new MazePosition(current.row() - 1, current.col()),
+                    new MazePosition(current.row() + 1, current.col()),
+                    new MazePosition(current.row(), current.col() - 1),
+                    new MazePosition(current.row(), current.col() + 1)
+            )) {
+                if (isPlayerPathTile(pattern, neighbor)
+                        && visited.add(neighbor)) {
+                    open.add(neighbor);
+                }
+            }
+        }
+
+        int playerPathCount = 0;
+        for (String row : pattern) {
+            for (int col = 0; col < row.length(); col++) {
+                char symbol = row.charAt(col);
+                if (symbol != '#' && symbol != 'H' && symbol != 'G') {
+                    playerPathCount++;
+                }
+            }
+        }
+
+        if (visited.size() != playerPathCount) {
+            throw new IllegalArgumentException(
+                    "All player paths and pellets must be reachable"
+            );
+        }
+    }
+
+    private static MazePosition findSymbol(
+            List<String> pattern,
+            char wantedSymbol
+    ) {
+        for (int row = 0; row < pattern.size(); row++) {
+            int col = pattern.get(row).indexOf(wantedSymbol);
+            if (col >= 0) {
+                return new MazePosition(row, col);
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Maze is missing symbol " + wantedSymbol
+        );
+    }
+
+    private static boolean isPlayerPathTile(
+            List<String> pattern,
+            MazePosition position
+    ) {
+        if (position.row() < 0
+                || position.row() >= MAZE_HEIGHT
+                || position.col() < 0
+                || position.col() >= MAZE_WIDTH) {
+            return false;
+        }
+
+        char symbol = pattern.get(position.row())
+                .charAt(position.col());
+        return symbol != '#' && symbol != 'H' && symbol != 'G';
     }
 
     private static MazePosition findFirstPathTile(List<String> pattern) {

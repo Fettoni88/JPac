@@ -1,12 +1,10 @@
 package ffhs.jpac.ui;
 
 import ffhs.jpac.engine.GameLoop;
-import ffhs.jpac.maze.MazePosition;
-import ffhs.jpac.world.*;
+import ffhs.jpac.world.TileMap;
+import ffhs.jpac.world.World;
 
 import javax.swing.JFrame;
-import java.awt.Color;
-import java.util.List;
 
 public class GameWindow {
 
@@ -26,42 +24,7 @@ public class GameWindow {
         int worldHeight = map.getRows() * map.getTileSize();
 
         World world = new World(worldWidth, worldHeight, map);
-        Player player = new Player(
-                spawnX(map.getPlayerSpawn(), map, Player.SIZE),
-                spawnY(map.getPlayerSpawn(), map, Player.SIZE)
-        );
-        world.addEntity(player);
-
-        Color[] colors = {
-                Color.RED,
-                Color.PINK,
-                Color.CYAN,
-                Color.ORANGE
-        };
-        GhostPersonality[] personalities = {
-                GhostPersonality.RED,
-                GhostPersonality.PINK,
-                GhostPersonality.CYAN,
-                GhostPersonality.ORANGE
-        };
-        double[] releaseDelays = {0, 3, 6, 9};
-        List<MazePosition> ghostSpawns = map.getGhostSpawns();
-
-        for (int index = 0; index < 4; index++) {
-            MazePosition spawn = ghostSpawns.get(index);
-            world.addEntity(new Ghost(
-                    spawnX(spawn, map, Ghost.SIZE),
-                    spawnY(spawn, map, Ghost.SIZE),
-                    colors[index],
-                    personalities[index],
-                    releaseDelays[index]
-            ));
-        }
-
-        world.setPlayer(player);
-        world.generatePellets();
-
-        panel = new GamePanel(player, map, world);
+        panel = new GamePanel(world);
 
         frame.add(panel);
         frame.pack();
@@ -74,25 +37,5 @@ public class GameWindow {
     public void show() {
         frame.setVisible(true);
         panel.requestFocus();
-    }
-
-    private double spawnX(
-            MazePosition position,
-            TileMap map,
-            int entitySize
-    ) {
-        return position.col() * map.getTileSize()
-                + map.getTileSize() / 2.0
-                - entitySize / 2.0;
-    }
-
-    private double spawnY(
-            MazePosition position,
-            TileMap map,
-            int entitySize
-    ) {
-        return position.row() * map.getTileSize()
-                + map.getTileSize() / 2.0
-                - entitySize / 2.0;
     }
 }

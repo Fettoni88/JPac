@@ -4,14 +4,15 @@ import ffhs.jpac.maze.MazePosition;
 import ffhs.jpac.persistence.HighscoreEntry;
 import ffhs.jpac.persistence.HighscoreManager;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 public class World {
 
-    private final int width;
-    private final int height;
-    private final TileMap map;
+    private int width;
+    private int height;
+    private TileMap map;
     private final List<Entity> entities = new ArrayList<>();
     private final List<Pellet> pellets = new ArrayList<>();
     private final HighscoreManager highscoreManager;
@@ -110,6 +111,27 @@ public class World {
         }
     }
 
+    public void confirmPlayerName(String name) {
+        if (gameState != GameState.NAME_INPUT) {
+            return;
+        }
+
+        playerName = normalizePlayerName(name);
+        gameState = GameState.MAZE_SELECTION;
+    }
+
+    public void startMaze(String mazeId) {
+        if (gameState != GameState.MAZE_SELECTION) {
+            return;
+        }
+
+        TileMap selectedMap = new TileMap(
+                "/mazes/" + mazeId + ".json"
+        );
+        initializeMaze(selectedMap);
+        gameState = GameState.PLAYING;
+    }
+
     public void showHighscores() {
         highscores = highscoreManager.loadHighscores();
         gameState = GameState.HIGHSCORE;
@@ -144,6 +166,60 @@ public class World {
         generatePellets();
     }
 
+    private void initializeMaze(TileMap selectedMap) {
+        map = selectedMap;
+        width = map.getCols() * map.getTileSize();
+        height = map.getRows() * map.getTileSize();
+        score = 0;
+        highscoreSaved = false;
+        entities.clear();
+        pellets.clear();
+
+        player = new Player(
+                spawnX(map.getPlayerSpawn(), Player.SIZE),
+                spawnY(map.getPlayerSpawn(), Player.SIZE)
+        );
+        entities.add(player);
+
+        Color[] colors = {
+                Color.RED,
+                Color.PINK,
+                Color.CYAN,
+                Color.ORANGE
+        };
+        GhostPersonality[] personalities = {
+                GhostPersonality.RED,
+                GhostPersonality.PINK,
+                GhostPersonality.CYAN,
+                GhostPersonality.ORANGE
+        };
+        double[] releaseDelays = {0, 3, 6, 9};
+        List<MazePosition> ghostSpawns = map.getGhostSpawns();
+
+        for (int index = 0; index < 4; index++) {
+            MazePosition spawn = ghostSpawns.get(index);
+            entities.add(new Ghost(
+                    spawnX(spawn, Ghost.SIZE),
+                    spawnY(spawn, Ghost.SIZE),
+                    colors[index],
+                    personalities[index],
+                    releaseDelays[index]
+            ));
+        }
+
+        generatePellets();
+    }
+
+    private double spawnX(MazePosition position, int entitySize) {
+        return position.col() * map.getTileSize()
+                + (map.getTileSize() - entitySize) / 2.0;
+    }
+
+    private double spawnY(MazePosition position, int entitySize) {
+        return position.row() * map.getTileSize()
+                + (map.getTileSize() - entitySize) / 2.0;
+    }
+
     public void update(double deltaTime) {
 
         if (gameState != GameState.PLAYING) {
@@ -176,7 +252,12 @@ public class World {
             return;
         }
 
-        highscores = highscoreManager.addScore(playerName, score);
+        highscores = highscoreManager.addScore(
+                playerName,
+                score,
+                map.getMazeId(),
+                map.getMazeName()
+        );
         highscoreSaved = true;
     }
 
@@ -241,15 +322,7 @@ public class World {
             return true;
         }
 
-        if (!map.isGhostHouse(row, col)) {
-            return false;
-        }
-
-        if (entity instanceof Player) {
-            return true;
-        }
-
-        return entity instanceof Ghost ghost && ghost.hasLeftGhostHouse();
+        return entity instanceof Player && map.isGhostHouse(row, col);
     }
 
     private void checkPelletCollection() {

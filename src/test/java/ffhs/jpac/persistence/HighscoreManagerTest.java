@@ -46,4 +46,17 @@ class HighscoreManagerTest {
         assertEquals(110, highscores.get(0).getScore());
         assertEquals(20, highscores.get(9).getScore());
     }
+
+    @Test
+    void highscoreStoresMazeInformation() throws IOException {
+        Path file = Files.createTempFile("jpac-maze-highscores", ".json");
+        Files.deleteIfExists(file);
+        HighscoreManager manager = new HighscoreManager(file);
+
+        manager.addScore("Necib", 1200, "maze3", "Maze 3");
+
+        HighscoreEntry entry = manager.loadHighscores().getFirst();
+        assertEquals("maze3", entry.getMazeId());
+        assertEquals("Maze 3", entry.getMazeName());
+    }
 }

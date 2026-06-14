@@ -27,10 +27,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GamePanelTest {
 
     @Test
-    void panelSizeIncludesMapAndHudBar() {
+    void menuUsesFixedSize() {
         TestGame testGame = createTestGame(43, 43);
-        TileMap map = testGame.world().getMap();
 
+        assertEquals(
+                new Dimension(800, 600),
+                testGame.panel().getPreferredSize()
+        );
+    }
+
+    @Test
+    void selectedMazeSetsGameplaySize() {
+        TestGame testGame = createTestGame(43, 43);
+
+        openMazeOne(testGame.panel());
+
+        TileMap map = testGame.world().getMap();
         assertEquals(
                 new Dimension(
                         map.getCols() * map.getTileSize(),
@@ -66,7 +78,7 @@ class GamePanelTest {
     }
 
     @Test
-    void startOptionOpensNameInputAndEnterStartsGame() {
+    void startOptionOpensNameInputThenMazeSelection() {
         TestGame testGame = createTestGame(43, 43);
 
         pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
@@ -79,8 +91,17 @@ class GamePanelTest {
         pressKey(testGame.panel(), KeyEvent.VK_B, 'b');
         pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
 
-        assertEquals(GameState.PLAYING, testGame.world().getGameState());
+        assertEquals(
+                GameState.MAZE_SELECTION,
+                testGame.world().getGameState()
+        );
         assertEquals("Necib", testGame.world().getPlayerName());
+
+        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
+
+        assertEquals(GameState.PLAYING, testGame.world().getGameState());
+        assertEquals("maze1", testGame.world().getMap().getMazeId());
+        assertEquals(5, testGame.world().getEntities().size());
     }
 
     @Test
@@ -90,8 +111,24 @@ class GamePanelTest {
         pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
         pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
 
-        assertEquals(GameState.PLAYING, testGame.world().getGameState());
+        assertEquals(
+                GameState.MAZE_SELECTION,
+                testGame.world().getGameState()
+        );
         assertEquals("Player", testGame.world().getPlayerName());
+    }
+
+    @Test
+    void mouseSelectsMazeAfterNameInput() {
+        TestGame testGame = createTestGame(43, 43);
+
+        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
+        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
+        moveMouse(testGame.panel(), 400, 314);
+        clickMouse(testGame.panel(), 400, 314);
+
+        assertEquals(GameState.PLAYING, testGame.world().getGameState());
+        assertEquals("maze3", testGame.world().getMap().getMazeId());
     }
 
     @Test
@@ -140,7 +177,6 @@ class GamePanelTest {
     @Test
     void arrowKeyMovesPlayerOnlyAfterNameIsConfirmed() {
         TestGame testGame = createTestGame(243, 315);
-        testGame.world().generatePellets();
 
         pressKey(
                 testGame.panel(),
@@ -150,8 +186,10 @@ class GamePanelTest {
         testGame.world().update(1.0);
         assertEquals(243, testGame.player().getX(), 0.0001);
 
-        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
-        pressKey(testGame.panel(), KeyEvent.VK_ENTER, '\n');
+        openMazeOne(testGame.panel());
+        Player activePlayer = testGame.world().getPlayer();
+        double startX = activePlayer.getX();
+        double startY = activePlayer.getY();
         pressKey(
                 testGame.panel(),
                 KeyEvent.VK_RIGHT,
@@ -162,8 +200,14 @@ class GamePanelTest {
             testGame.world().update(1.0 / 60.0);
         }
 
-        assertTrue(testGame.player().getX() > 262);
-        assertEquals(315, testGame.player().getY(), 0.0001);
+        assertTrue(activePlayer.getX() > startX);
+        assertEquals(startY, activePlayer.getY(), 0.0001);
+    }
+
+    private void openMazeOne(GamePanel panel) {
+        pressKey(panel, KeyEvent.VK_ENTER, '\n');
+        pressKey(panel, KeyEvent.VK_ENTER, '\n');
+        pressKey(panel, KeyEvent.VK_ENTER, '\n');
     }
 
     private TestGame createTestGame(double playerX, double playerY) {
