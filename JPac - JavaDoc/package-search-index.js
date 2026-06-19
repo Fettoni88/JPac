@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"Alle Packages","u":"allpackages-index.html"},{"l":"ffhs.jpac"},{"l":"ffhs.jpac.engine"},{"l":"ffhs.jpac.maze"},{"l":"ffhs.jpac.persistence"},{"l":"ffhs.jpac.ui"},{"l":"ffhs.jpac.world"}];updateSearchResults();

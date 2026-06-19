@@ -4,40 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="docs: add technical documentation for JPac game architecture and design">
+    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="docs: add detailed comments and documentation for game classes and mechanics">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/GameApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/GameApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/engine/GameLoop.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/engine/GameLoop.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazePosition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazePosition.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/persistence/HighscoreEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/persistence/HighscoreEntry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/persistence/HighscoreManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/persistence/HighscoreManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GameWindow.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/TileRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/TileRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/BlueTargetStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/BlueTargetStrategy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/ChaseState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/ChaseState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Direction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GameState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GameState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostNavigator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostNavigator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostPersonality.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostPersonality.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostReleaseState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostReleaseState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostTargetStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostTargetStrategy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/IdleState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/MovingEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/MovingEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/OrangeTargetStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/OrangeTargetStrategy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Pellet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Pellet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/PinkTargetStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/PinkTargetStrategy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/RedTargetStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/RedTargetStrategy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +127,7 @@
       <workItem from="1780748031301" duration="2450000" />
       <workItem from="1781450976337" duration="8967000" />
       <workItem from="1781464527217" duration="4427000" />
-      <workItem from="1781860837576" duration="3529000" />
+      <workItem from="1781860837576" duration="4500000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor NPC classes to Ghost classes and update related methods">
       <option name="closed" value="true" />
@@ -224,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1781863296563</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="docs: add detailed comments and documentation for game classes and mechanics">
+      <option name="closed" value="true" />
+      <created>1781865208901</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1781865208901</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -238,7 +215,8 @@
     <MESSAGE value="feat: introduce ghost release states and target strategies" />
     <MESSAGE value="feat: refactor maze validation and input handling in game loop" />
     <MESSAGE value="docs: add technical documentation for JPac game architecture and design" />
-    <option name="LAST_COMMIT_MESSAGE" value="docs: add technical documentation for JPac game architecture and design" />
+    <MESSAGE value="docs: add detailed comments and documentation for game classes and mechanics" />
+    <option name="LAST_COMMIT_MESSAGE" value="docs: add detailed comments and documentation for game classes and mechanics" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
