@@ -4,6 +4,9 @@ import ffhs.jpac.maze.MazePosition;
 
 import java.util.List;
 
+/**
+ * Zielstrategie des blauen Geistes mit Patrouillen- und Verfolgungsphasen.
+ */
 class BlueTargetStrategy implements GhostTargetStrategy {
 
     private static final int CHASE_RANGE = 6;
@@ -14,12 +17,24 @@ class BlueTargetStrategy implements GhostTargetStrategy {
     private double chaseTimer;
     private double patrolCooldown;
 
+    /**
+     * Aktualisiert Verfolgungsdauer und Abklingzeit.
+     *
+     * @param deltaTime vergangene Zeit seit dem letzten Frame in Sekunden
+     */
     @Override
     public void update(double deltaTime) {
         chaseTimer = Math.max(0, chaseTimer - deltaTime);
         patrolCooldown = Math.max(0, patrolCooldown - deltaTime);
     }
 
+    /**
+     * Liefert abhängig von Distanz und Timern ein Spieler- oder Patrouillenziel.
+     *
+     * @param ghost steuernder Geist
+     * @param world aktuelle Spielwelt
+     * @return aktuelle Zielkachel
+     */
     @Override
     public MazePosition getTarget(Ghost ghost, World world) {
         MazePosition ghostTile = ghost.getCurrentTile(world);
@@ -46,6 +61,9 @@ class BlueTargetStrategy implements GhostTargetStrategy {
         return target;
     }
 
+    /**
+     * Setzt Patrouillenindex und Zeitgeber zurück.
+     */
     @Override
     public void reset() {
         patrolIndex = 0;

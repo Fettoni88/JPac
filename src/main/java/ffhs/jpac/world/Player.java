@@ -1,7 +1,15 @@
 package ffhs.jpac.world;
 
+/**
+ * Repräsentiert die vom Benutzer gesteuerte Spielfigur.
+ *
+ * <p>Die Bewegung erfolgt kontinuierlich zwischen Kachelmittelpunkten.
+ * Richtungswünsche werden kurz gepuffert und nur an zulässigen Kreuzungen
+ * übernommen.</p>
+ */
 public class Player extends MovingEntity {
 
+    /** Quadratische Kantenlänge des Spielers in Pixeln. */
     public static final int SIZE = 18;
     private static final double CENTER_TOLERANCE = 2.0;
     private static final double POSITION_EPSILON = 0.0001;
@@ -11,18 +19,39 @@ public class Player extends MovingEntity {
     private Direction desiredDirection = Direction.NONE;
     private double inputBufferTimer;
 
+    /**
+     * Erstellt einen Spieler an der angegebenen Spawnposition.
+     *
+     * @param x horizontale Spawnposition in Pixeln
+     * @param y vertikale Spawnposition in Pixeln
+     */
     public Player(double x, double y) {
         super(x, y, SIZE, 200.0);
     }
 
+    /**
+     * Setzt den horizontalen Bewegungsanteil.
+     *
+     * @param dx horizontaler Richtungsanteil
+     */
     public void setDx(int dx) {
         this.dx = dx;
     }
 
+    /**
+     * Setzt den vertikalen Bewegungsanteil.
+     *
+     * @param dy vertikaler Richtungsanteil
+     */
     public void setDy(int dy) {
         this.dy = dy;
     }
 
+    /**
+     * Puffert einen Richtungswunsch für eine kurze Zeitspanne.
+     *
+     * @param direction gewünschte Bewegungsrichtung
+     */
     public void setDesiredDirection(Direction direction) {
         desiredDirection = direction;
         inputBufferTimer = direction == Direction.NONE
@@ -30,10 +59,18 @@ public class Player extends MovingEntity {
                 : INPUT_BUFFER_DURATION;
     }
 
+    /**
+     * Gibt die aktuell ausgeführte Bewegungsrichtung zurück.
+     *
+     * @return aktuelle Richtung
+     */
     public Direction getCurrentDirection() {
         return currentDirection;
     }
 
+    /**
+     * Setzt Position, Bewegungsrichtung und Eingabepuffer zurück.
+     */
     @Override
     public void reset() {
         super.reset();
@@ -42,10 +79,19 @@ public class Player extends MovingEntity {
         inputBufferTimer = 0;
     }
 
+    /**
+     * Bewegt den Spieler kachelzentriert durch das Labyrinth.
+     *
+     * @param world aktuelle Spielwelt
+     * @param deltaTime vergangene Zeit seit dem letzten Frame in Sekunden
+     */
     @Override
     public void update(World world, double deltaTime) {
         double remainingTime = Math.max(0, deltaTime);
 
+        // Ein grosser Frame kann mehrere Kachelmittelpunkte überschreiten.
+        // Teilbewegungen stellen sicher, dass an jedem Mittelpunkt eine
+        // Richtungs- und Kollisionsentscheidung erfolgt.
         while (remainingTime > POSITION_EPSILON) {
             if (isNearTileCenter(world)) {
                 snapPlayerToTileCenter(world);
@@ -85,11 +131,23 @@ public class Player extends MovingEntity {
         dy = currentDirection.getDy();
     }
 
+    /**
+     * Begrenzt die horizontale Position auf ein Intervall.
+     *
+     * @param min kleinster zulässiger Wert
+     * @param max grösster zulässiger Wert
+     */
     public void clampX(double min, double max) {
         if (x < min) x = min;
         if (x > max) x = max;
     }
 
+    /**
+     * Begrenzt die vertikale Position auf ein Intervall.
+     *
+     * @param min kleinster zulässiger Wert
+     * @param max grösster zulässiger Wert
+     */
     public void clampY(double min, double max) {
         if (y < min) y = min;
         if (y > max) y = max;

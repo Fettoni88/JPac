@@ -8,8 +8,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Bewegliche Gegnerfigur mit Freigabephase, Zustandslogik und Persönlichkeit.
+ *
+ * <p>Ein Geist wartet zunächst im Geisterhaus, folgt anschliessend einem
+ * deterministischen Weg zum Ausgang und verwendet danach seine individuelle
+ * Zielstrategie.</p>
+ */
 public class Ghost extends MovingEntity {
 
+    /** Quadratische Kantenlänge eines Geistes in Pixeln. */
     public static final int SIZE = 18;
     private static final double SPEED = 100.0;
     private static final double ATTACK_RANGE = 20;
@@ -26,10 +34,26 @@ public class Ghost extends MovingEntity {
     private GhostReleaseState releaseState =
             GhostReleaseState.WAITING_IN_HOUSE;
 
+    /**
+     * Erstellt einen roten Geist ohne Freigabeverzögerung.
+     *
+     * @param x horizontale Spawnposition in Pixeln
+     * @param y vertikale Spawnposition in Pixeln
+     * @param color Darstellungsfarbe
+     */
     public Ghost(double x, double y, Color color) {
         this(x, y, color, GhostPersonality.RED, 0);
     }
 
+    /**
+     * Erstellt einen konfigurierten Geist.
+     *
+     * @param x horizontale Spawnposition in Pixeln
+     * @param y vertikale Spawnposition in Pixeln
+     * @param color Darstellungsfarbe
+     * @param personality Zielstrategie des Geistes
+     * @param releaseDelaySeconds Wartezeit im Geisterhaus in Sekunden
+     */
     public Ghost(
             double x,
             double y,
@@ -44,34 +68,72 @@ public class Ghost extends MovingEntity {
         this.releaseDelaySeconds = releaseDelaySeconds;
     }
 
+    /**
+     * Gibt die Darstellungsfarbe zurück.
+     *
+     * @return Darstellungsfarbe des Geistes
+     */
     public Color getColor() {
         return color;
     }
 
+    /**
+     * Gibt die konfigurierte Persönlichkeit zurück.
+     *
+     * @return Geistpersönlichkeit
+     */
     public GhostPersonality getPersonality() {
         return personality;
     }
 
+    /**
+     * Gibt die Wartezeit vor dem Verlassen des Hauses zurück.
+     *
+     * @return Freigabeverzögerung in Sekunden
+     */
     public double getReleaseDelay() {
         return releaseDelaySeconds;
     }
 
+    /**
+     * Prüft, ob die Freigabeverzögerung abgelaufen ist.
+     *
+     * @return {@code true}, sobald der Geist das Haus verlassen darf
+     */
     public boolean isReleased() {
         return releaseElapsedSeconds >= releaseDelaySeconds;
     }
 
+    /**
+     * Prüft, ob der Geist das Geisterhaus verlassen hat.
+     *
+     * @return {@code true} im aktiven Zustand
+     */
     public boolean hasLeftGhostHouse() {
         return releaseState == GhostReleaseState.ACTIVE;
     }
 
+    /**
+     * Prüft, ob die normale Geist-KI aktiv ist.
+     *
+     * @return {@code true} im Zustand {@link GhostReleaseState#ACTIVE}
+     */
     public boolean isActive() {
         return releaseState == GhostReleaseState.ACTIVE;
     }
 
+    /**
+     * Gibt die aktuelle Phase der Hausfreigabe zurück.
+     *
+     * @return Freigabezustand
+     */
     public GhostReleaseState getReleaseState() {
         return releaseState;
     }
 
+    /**
+     * Setzt Position, KI-Zustand, Timer und Strategie zurück.
+     */
     @Override
     public void reset() {
         super.reset();
@@ -83,11 +145,20 @@ public class Ghost extends MovingEntity {
         targetStrategy.reset();
     }
 
+    /**
+     * Stoppt die aktuelle Bewegung.
+     */
     public void stopMoving() {
         dx = 0;
         dy = 0;
     }
 
+    /**
+     * Wählt im Leerlauf eine zulässige Richtung ohne unnötige Umkehr.
+     *
+     * @param world aktuelle Spielwelt
+     * @return {@code true}, wenn eine Richtung gewählt wurde
+     */
     protected boolean chooseIdleDirection(World world) {
         if (!canChooseDirection(world)) {
             return false;
@@ -99,6 +170,8 @@ public class Ghost extends MovingEntity {
             return false;
         }
 
+        // Die Gegenrichtung bleibt ausgeschlossen, solange mindestens eine
+        // Vorwärts- oder Seitenroute verfügbar ist.
         Direction oppositeDirection = getDirection().opposite();
         List<Direction> forwardAndSideDirections = new ArrayList<>(
                 directions
@@ -119,6 +192,11 @@ public class Ghost extends MovingEntity {
         return true;
     }
 
+    /**
+     * Wählt anhand der Persönlichkeitsstrategie den nächsten Weg zum Ziel.
+     *
+     * @param world aktuelle Spielwelt
+     */
     protected void chasePlayer(World world) {
         if (!canChooseDirection(world)) {
             return;
@@ -176,6 +254,12 @@ public class Ghost extends MovingEntity {
         );
     }
 
+    /**
+     * Aktualisiert Freigabephase, Strategie und Bewegungszustand.
+     *
+     * @param world aktuelle Spielwelt
+     * @param deltaTime vergangene Zeit seit dem letzten Frame in Sekunden
+     */
     @Override
     public void update(World world, double deltaTime) {
         if (releaseState == GhostReleaseState.WAITING_IN_HOUSE) {
@@ -190,6 +274,8 @@ public class Ghost extends MovingEntity {
                     : GhostReleaseState.ACTIVE;
         }
 
+        // Während des Verlassens darf keine zufällige oder verfolgende
+        // Strategie die kürzeste Route zum Ausgang überschreiben.
         if (releaseState == GhostReleaseState.LEAVING_HOUSE) {
             leaveGhostHouse(world, deltaTime);
             return;
@@ -316,6 +402,8 @@ public class Ghost extends MovingEntity {
             return;
         }
 
+        // Richtungsentscheidungen erfolgen nur an Kachelmittelpunkten, damit
+        // der Geist innerhalb enger Hausgänge nicht hin- und herzittert.
         if (canChooseDirection(world)) {
             Direction exitDirection =
                     world.getMap().getDirectionTowardNearestGhostHouseExit(

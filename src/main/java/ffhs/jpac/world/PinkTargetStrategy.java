@@ -2,10 +2,23 @@ package ffhs.jpac.world;
 
 import ffhs.jpac.maze.MazePosition;
 
+/**
+ * Zielstrategie des pinken Geistes: Vorwegnahme der Spielerbewegung.
+ */
 class PinkTargetStrategy implements GhostTargetStrategy {
 
     private static final int AMBUSH_DISTANCE = 4;
 
+    /**
+     * Berechnet ein Ziel vier Kacheln vor dem Spieler.
+     *
+     * <p>Ist der Vorhaltepunkt ungültig oder nicht erreichbar, wird die
+     * aktuelle Spielerkachel verwendet.</p>
+     *
+     * @param ghost steuernder Geist
+     * @param world aktuelle Spielwelt
+     * @return erreichbare Zielkachel
+     */
     @Override
     public MazePosition getTarget(
             Ghost ghost,

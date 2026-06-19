@@ -15,6 +15,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Lädt, sortiert und speichert die lokale Highscore-Liste als JSON-Datei.
+ *
+ * <p>Persistenzfehler werden bewusst fehlertolerant behandelt, damit eine
+ * beschädigte oder nicht beschreibbare Datei das Spiel nicht beendet.</p>
+ */
 public class HighscoreManager {
 
     private static final int MAX_HIGHSCORES = 10;
@@ -24,15 +30,30 @@ public class HighscoreManager {
     private final Path filePath;
     private final Gson gson;
 
+    /**
+     * Erstellt einen Manager für die Datei {@code highscores.json} im
+     * aktuellen Arbeitsverzeichnis.
+     */
     public HighscoreManager() {
         this(Path.of("highscores.json"));
     }
 
+    /**
+     * Erstellt einen Manager für einen frei wählbaren Dateipfad.
+     *
+     * @param filePath Pfad der JSON-Datei
+     */
     public HighscoreManager(Path filePath) {
         this.filePath = filePath;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
+    /**
+     * Lädt die gespeicherten Highscores.
+     *
+     * @return absteigend sortierte Liste mit höchstens zehn Einträgen; bei
+     *         fehlender oder ungültiger Datei eine leere Liste
+     */
     public List<HighscoreEntry> loadHighscores() {
         try {
             if (!Files.exists(filePath)) {
@@ -51,6 +72,11 @@ public class HighscoreManager {
         }
     }
 
+    /**
+     * Speichert eine normalisierte Highscore-Liste.
+     *
+     * @param entries zu speichernde Einträge
+     */
     public void saveHighscores(List<HighscoreEntry> entries) {
         try (Writer writer = Files.newBufferedWriter(filePath)) {
             gson.toJson(prepareHighscores(entries), writer);
@@ -59,10 +85,26 @@ public class HighscoreManager {
         }
     }
 
+    /**
+     * Fügt einen Punktestand ohne Labyrinthzuordnung hinzu.
+     *
+     * @param name Name des Spielers
+     * @param score erreichte Punktzahl
+     * @return aktualisierte, sortierte Highscore-Liste
+     */
     public List<HighscoreEntry> addScore(String name, int score) {
         return addScore(name, score, "", "Unknown Maze");
     }
 
+    /**
+     * Fügt einen Punktestand mit Labyrinthzuordnung hinzu und speichert ihn.
+     *
+     * @param name Name des Spielers
+     * @param score erreichte Punktzahl
+     * @param mazeId technische Labyrinthkennung
+     * @param mazeName Anzeigename des Labyrinths
+     * @return aktualisierte, sortierte Highscore-Liste
+     */
     public List<HighscoreEntry> addScore(
             String name,
             int score,

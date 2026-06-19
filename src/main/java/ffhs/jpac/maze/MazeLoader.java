@@ -15,9 +15,17 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+/**
+ * Lädt Labyrinthe aus JSON-Ressourcen und validiert deren fachliche Regeln.
+ *
+ * <p>Die Validierung umfasst Abmessungen, unterstützte Symbole, Spawnpunkte,
+ * zusammenhängende Wege und die Struktur des Geisterhauses.</p>
+ */
 public final class MazeLoader {
 
+    /** Vorgeschriebene Breite jedes JSON-Labyrinths in Kacheln. */
     public static final int MAZE_WIDTH = 24;
+    /** Vorgeschriebene Höhe jedes JSON-Labyrinths in Kacheln. */
     public static final int MAZE_HEIGHT = 32;
 
     private static final Set<Character> SUPPORTED_SYMBOLS = Set.of(
@@ -34,6 +42,14 @@ public final class MazeLoader {
     private MazeLoader() {
     }
 
+    /**
+     * Lädt und validiert ein Labyrinth aus dem Klassenpfad.
+     *
+     * @param resourcePath absoluter Ressourcenpfad innerhalb des Klassenpfads
+     * @return validierte Labyrinthdaten
+     * @throws IllegalArgumentException wenn die Ressource fehlt, ungültiges
+     *         JSON enthält oder eine Labyrinthregel verletzt
+     */
     public static MazeData load(String resourcePath) {
         InputStream input = MazeLoader.class.getResourceAsStream(resourcePath);
         if (input == null) {
@@ -57,6 +73,13 @@ public final class MazeLoader {
         }
     }
 
+    /**
+     * Prüft Labyrinthdaten auf alle unterstützten Strukturregeln.
+     *
+     * @param mazeData zu validierende Labyrinthdaten
+     * @throws IllegalArgumentException wenn Daten fehlen oder eine Regel
+     *         verletzt wird
+     */
     public static void validate(MazeData mazeData) {
         if (mazeData == null || mazeData.getPattern() == null) {
             throw new IllegalArgumentException("Maze pattern is missing");
@@ -164,6 +187,7 @@ public final class MazeLoader {
         visited.add(start);
         open.add(start);
 
+        // Die Breitensuche muss sämtliche Nicht-Wand-Kacheln erreichen.
         while (!open.isEmpty()) {
             MazePosition current = open.remove();
 
@@ -240,6 +264,8 @@ public final class MazeLoader {
         visited.add(houseTiles.getFirst());
         open.add(houseTiles.getFirst());
 
+        // Eine einzige zusammenhängende Komponente verhindert voneinander
+        // getrennte Spawnkammern mit unerreichbaren Ausgängen.
         while (!open.isEmpty()) {
             MazePosition current = open.remove();
             for (MazePosition neighbor : neighborsOf(current)) {
@@ -301,6 +327,8 @@ public final class MazeLoader {
         visited.add(start);
         open.add(start);
 
+        // H- und G-Kacheln werden bewusst ausgeschlossen, weil der Spieler
+        // das Geisterhaus nicht betreten darf.
         while (!open.isEmpty()) {
             MazePosition current = open.remove();
             for (MazePosition neighbor : neighborsOf(current)) {

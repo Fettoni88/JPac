@@ -6,12 +6,21 @@ import ffhs.jpac.world.World;
 
 import javax.swing.JFrame;
 
+/**
+ * Erstellt und verwaltet das nicht skalierbare Hauptfenster von JPac.
+ *
+ * <p>Die Klasse verbindet Karte, Spielwelt, Panel und Spielschleife.</p>
+ */
 public class GameWindow {
 
     private final JFrame frame;
     private final GameLoop loop;
     private final GamePanel panel;
 
+    /**
+     * Initialisiert das Fenster mit dem ersten Labyrinth und startet die
+     * Spielschleife.
+     */
     public GameWindow() {
 
         frame = new JFrame("JPac Prototype");
@@ -34,6 +43,9 @@ public class GameWindow {
         loop.start();
     }
 
+    /**
+     * Zeigt das Fenster an und übergibt den Tastaturfokus an das Spielfeld.
+     */
     public void show() {
         frame.setVisible(true);
         panel.requestFocus();

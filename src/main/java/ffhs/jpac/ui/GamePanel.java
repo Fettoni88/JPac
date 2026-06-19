@@ -25,6 +25,13 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.IntFunction;
 
+/**
+ * Zentrale Swing-Komponente für Darstellung und Benutzereingaben.
+ *
+ * <p>Das Panel zeichnet Menüs, Spielwelt, HUD und Endbildschirme. Tastatur-
+ * und Mausereignisse werden abhängig vom aktuellen {@link GameState}
+ * weitergeleitet.</p>
+ */
 public class GamePanel extends JPanel {
 
     private static final String[] MENU_OPTIONS = {
@@ -54,13 +61,24 @@ public class GamePanel extends JPanel {
     private static final int MAX_NAME_LENGTH = 20;
     private static final int HUD_HEIGHT = 40;
 
+    /** Vom Panel dargestellte und über Eingaben gesteuerte Spielwelt. */
     private final World world;
+    /** Austauschbare Aktion zum Beenden der Anwendung. */
     private final Runnable exitAction;
+    /** Während der Namenseingabe aufgebauter Text. */
     private final StringBuilder nameInput = new StringBuilder();
+    /** Aktuell markierter Eintrag im Hauptmenü. */
     private int selectedMenuOption;
+    /** Aktuell markiertes Labyrinth. */
     private int selectedMazeOption;
+    /** Aktuell markierter Eintrag des Endbildschirms. */
     private int selectedEndOption;
 
+    /**
+     * Erstellt das Panel für eine Spielwelt.
+     *
+     * @param world darzustellende und zu steuernde Spielwelt
+     */
     public GamePanel(World world) {
         this(world, () -> System.exit(0));
     }
@@ -95,6 +113,8 @@ public class GamePanel extends JPanel {
     }
 
     private void handleKeyPressed(KeyEvent event) {
+        // Ausserhalb von PLAYING werden Eingaben ausschliesslich an die
+        // jeweilige Menüansicht geleitet; Pac-Man kann dort nicht bewegen.
         switch (world.getGameState()) {
             case START_MENU -> handleMenuKeyPressed(event);
             case NAME_INPUT -> handleNameInputKeyPressed(event);
@@ -432,6 +452,8 @@ public class GamePanel extends JPanel {
     }
 
     private void renderEndScreen(Graphics graphics, String title) {
+        // Eine halbtransparente Fläche lässt den Endzustand der Welt sichtbar,
+        // hält Text und Menü aber unabhängig vom Labyrinth lesbar.
         graphics.setColor(new Color(0, 0, 0, 210));
         graphics.fillRect(0, 0, getWidth(), getHeight());
 
@@ -511,6 +533,11 @@ public class GamePanel extends JPanel {
         graphics.drawString(text, x, y);
     }
 
+    /**
+     * Zeichnet abhängig vom Spielzustand die passende Ansicht.
+     *
+     * @param graphics Zeichenkontext des Swing-Frameworks
+     */
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
@@ -541,6 +568,8 @@ public class GamePanel extends JPanel {
         TileMap map = world.getMap();
         int mazeWidth = map.getCols() * map.getTileSize();
         int mazeHeight = map.getRows() * map.getTileSize();
+        // Der separate Grafikbereich verschiebt ausschliesslich die Spielwelt;
+        // der HUD-Balken bleibt dadurch oberhalb des Labyrinths.
         Graphics mazeGraphics = graphics.create(
                 0,
                 HUD_HEIGHT,

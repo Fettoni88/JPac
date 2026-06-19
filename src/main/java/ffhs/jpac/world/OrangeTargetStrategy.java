@@ -2,10 +2,21 @@ package ffhs.jpac.world;
 
 import ffhs.jpac.maze.MazePosition;
 
+/**
+ * Zielstrategie des orangen Geistes mit Verfolgungs- und Fluchtverhalten.
+ */
 class OrangeTargetStrategy implements GhostTargetStrategy {
 
     private static final int FLEE_DISTANCE = 8;
 
+    /**
+     * Verfolgt einen entfernten Spieler und wählt im Nahbereich ein fernes
+     * Patrouillenziel.
+     *
+     * @param ghost steuernder Geist
+     * @param world aktuelle Spielwelt
+     * @return aktuelle Zielkachel
+     */
     @Override
     public MazePosition getTarget(
             Ghost ghost,

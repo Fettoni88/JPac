@@ -8,6 +8,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
+/**
+ * Kapselt die kachelbasierte Breitensuche für Geistbewegungen.
+ *
+ * <p>Die Klasse berechnet Distanzfelder rückwärts vom Ziel. Dadurch kann ein
+ * Geist an einer Kreuzung den Nachbarn mit der kleinsten Restdistanz wählen,
+ * ohne bei jedem Schritt einen vollständigen Pfad speichern zu müssen.</p>
+ */
 final class GhostNavigator {
 
     private static final List<Direction> DIRECTIONS = List.of(
@@ -187,6 +194,8 @@ final class GhostNavigator {
             openTiles.add(exit);
         }
 
+        // Mehrere Ausgänge werden gleichzeitig als BFS-Quellen behandelt;
+        // damit führt das Distanzfeld automatisch zum nächstgelegenen Ausgang.
         fillDistances(openTiles, distances, true);
         return distances;
     }
@@ -209,6 +218,8 @@ final class GhostNavigator {
             int[][] distances,
             boolean houseOnly
     ) {
+        // Klassische Breitensuche: Jede erstmals besuchte Kachel erhält ihre
+        // minimale Anzahl Schritte bis zur nächstgelegenen Quelle.
         while (!openTiles.isEmpty()) {
             MazePosition current = openTiles.remove();
 

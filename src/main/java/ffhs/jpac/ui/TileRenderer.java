@@ -6,15 +6,38 @@ import ffhs.jpac.world.TileType;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * Zeichnet den sichtbaren Ausschnitt einer {@link TileMap}.
+ */
 public class TileRenderer {
 
     private final TileMap map;
 
+    /**
+     * Erstellt einen Renderer für die angegebene Karte.
+     *
+     * @param map darzustellende Karte
+     */
     public TileRenderer(TileMap map) {
         this.map = map;
     }
 
-    public void render(Graphics g, int cameraX, int cameraY, int screenWidth, int screenHeight) {
+    /**
+     * Zeichnet alle Kacheln innerhalb des sichtbaren Rechtecks.
+     *
+     * @param g Zeichenkontext
+     * @param cameraX horizontale Position des sichtbaren Ausschnitts
+     * @param cameraY vertikale Position des sichtbaren Ausschnitts
+     * @param screenWidth Breite des sichtbaren Bereichs
+     * @param screenHeight Höhe des sichtbaren Bereichs
+     */
+    public void render(
+            Graphics g,
+            int cameraX,
+            int cameraY,
+            int screenWidth,
+            int screenHeight
+    ) {
 
         int tileSize = map.getTileSize();
 
@@ -27,7 +50,10 @@ public class TileRenderer {
         for (int row = firstRow; row <= lastRow; row++) {
             for (int col = firstCol; col <= lastCol; col++) {
 
-                if (row < 0 || col < 0 || row >= map.getRows() || col >= map.getCols()) {
+                if (row < 0
+                        || col < 0
+                        || row >= map.getRows()
+                        || col >= map.getCols()) {
                     continue;
                 }
 
