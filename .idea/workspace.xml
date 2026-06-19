@@ -4,19 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="feat: enhance ghost behavior and maze validation">
+    <list default="true" id="a53fad85-fc78-4bdf-905b-9fe1aec34fff" name="Changes" comment="feat: refactor maze validation and input handling in game loop">
+      <change afterPath="$PROJECT_DIR$/DOKUMENTATION.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/maze/MazeLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/ui/GamePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/AttackState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Ghost.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostPersonality.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/GhostPersonality.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Pellet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Pellet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/TileMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ffhs/jpac/world/World.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/GhostTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/GhostTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ffhs/jpac/world/WorldTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +127,8 @@
       <workItem from="1780732013355" duration="83000" />
       <workItem from="1780748031301" duration="2450000" />
       <workItem from="1781450976337" duration="8967000" />
-      <workItem from="1781464527217" duration="3750000" />
+      <workItem from="1781464527217" duration="4427000" />
+      <workItem from="1781860837576" duration="2265000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor NPC classes to Ghost classes and update related methods">
       <option name="closed" value="true" />
@@ -178,7 +170,23 @@
       <option name="project" value="LOCAL" />
       <updated>1781465576210</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="feat: introduce ghost release states and target strategies">
+      <option name="closed" value="true" />
+      <created>1781469991842</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1781469991842</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat: refactor maze validation and input handling in game loop">
+      <option name="closed" value="true" />
+      <created>1781470603075</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1781470603075</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -189,7 +197,9 @@
     <MESSAGE value="Add Ghost class with state-based behavior for NPC interactions" />
     <MESSAGE value="Implement direction handling and pellet collection mechanics" />
     <MESSAGE value="feat: enhance ghost behavior and maze validation" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: enhance ghost behavior and maze validation" />
+    <MESSAGE value="feat: introduce ghost release states and target strategies" />
+    <MESSAGE value="feat: refactor maze validation and input handling in game loop" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: refactor maze validation and input handling in game loop" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
